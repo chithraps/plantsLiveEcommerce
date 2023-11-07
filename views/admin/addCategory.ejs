@@ -1,0 +1,97 @@
+<%- include('../partials/adminHeader') %>
+<head>
+    <style>
+        .card-header{
+            background-color:  rgb(66, 182, 105);
+        }
+        .h3-text{
+            color:white;
+        }
+        .btn-class{
+            background-color:  rgb(66, 182, 105);
+            color:white;
+        }
+        .btn-class:hover{
+            background-color:  rgb(25, 95, 48);
+            color:white;
+           
+        }
+    </style>
+</head>
+<div class="container mt-5 mb-5 col">
+    <div class="row justify-content-center ">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center h3-text">Add Category</h3>
+                </div>
+                <div class="card-body">
+                    <form action="/admin/addCategory" method="POST" id="category">
+                        <div class="form-group">
+                            <label for="name">Name:</label>
+                            <input type="text" class="form-control" id="name" name="name" >
+                            <div class="error" id="nameError" style="color: red;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description:</label>
+                            <textarea class="form-control" id="description" name="description" rows="4"></textarea>
+                            <div class="error" id="descriptionError" style="color: red;"></div>
+                        </div>
+                        <div class="text-center mt-4 mb-4">
+                            <button type="submit" class="btn btn-class">Submit</button>
+                        </div>
+                    </form>
+                    <% if(typeof message!=='undefined' ){ %>
+                        <p style="color: green;">
+                            <%= message %>
+                        </p>
+                        <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+     const form = document.getElementById("category")
+     form.addEventListener('submit', e => {
+            e.preventDefault();
+
+      
+
+            clearErrors();
+
+            // Get input values
+            const name = document.getElementById("name").value;
+            const description = document.getElementById("description").value;
+            
+            
+            // Validate name (non-empty)
+            if (name === "") {
+                displayError("nameError", "Name cannot be empty");
+                return;
+            }
+            if (description === "") {
+                displayError("descriptionError", "description cannot be empty");
+                return;
+            }
+           
+           
+
+            form.submit();
+        });
+
+        function displayError(fieldId, errorMessage) {
+            const errorSpan = document.getElementById(fieldId);
+            errorSpan.textContent = errorMessage;
+        }
+
+        function clearErrors() {
+            const errorSpans = document.querySelectorAll(".error");
+            errorSpans.forEach(function (span) {
+                span.textContent = "";
+            });
+        }
+
+</script>
+    
+<%- include('../partials/adminFooter') %>

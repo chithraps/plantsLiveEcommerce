@@ -1,0 +1,275 @@
+<%- include('../partials/adminHeader') %>
+
+  <head>
+    <style>
+      .btn-class {
+        background-color: rgb(66, 182, 105);
+        color: #ffffff;
+      }
+
+      .btn-class:hover {
+        background-color: rgb(19, 102, 47);
+        color: #ffffff;
+      }
+
+      .product-image {
+        width: 210px;
+        height: 150px;
+
+      }
+
+      .page-number {
+        margin: 0 10px;
+        /* Adjust the margin as needed */
+      }
+
+      .card {
+        border: none;
+      }
+
+      .product-image:hover {
+        transform: scale(1.1);
+        transition: transform 0.3s ease;
+        cursor: pointer;
+      }
+
+
+      .container {
+        overflow-x: hidden !important;
+        /* Hide horizontal overflow */
+        max-width: 1100px;
+        overflow-y: auto;
+        /* Add a vertical scrollbar if necessary */
+      }
+
+      .search-input {
+        width: 270px;
+        /* Adjust the width as needed */
+        margin-right: 5px;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+      }
+
+      .modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 20px;
+        width: 30%;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+      }
+
+      .close {
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <div class="container mt-5">
+    <h1>Products</h1>
+
+    <form class="form-inline my-2 my-lg-0 ml-auto">
+      <div class="row">
+        <div class="col-md-3">
+          <input class="form-control mr-sm-2 search-input" type="text" placeholder="Search" aria-label="Search"
+            name="search">
+        </div>
+        <div class="col-md-9">
+          <input type="submit" value="search">
+        </div>
+      </div>
+    </form>
+
+    <br>
+    <div class="row">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Category</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% products.forEach((product)=> { %>
+            <tr>
+              <td>
+                <img src="<%= product.images[0] %>" class="product-image img-fluid" alt="<%= product.name %>"
+                  style="width: 100px; height: 100px;">
+              </td>
+              <td>
+                <%= product.name %>
+              </td>
+              <td><i class="fa-solid fa-indian-rupee-sign"></i>
+                <%= product.price %>
+              </td>
+              <td>
+                <%= product.category.name %>
+              </td>
+              <td>
+                <%= product.stock_count %>
+              </td>
+              <td>
+                <% if (product.is_Delelted) { %>
+                  Blocked
+                  <% } else { %>
+                    Active
+                    <% } %>
+              </td>
+              <td>
+                <a href="/admin/editProduct?id=<%= product._id %>" class="btn btn-class">Edit</a>
+                <% if (product.is_Deleted) { %>
+                  <a href="/admin/deleteProduct?id=<%= product._id %>" class="btn btn-class">Activate</a>
+                  <% } else { %>
+                    <a href="/admin/deleteProduct?id=<%= product._id %>" class="btn btn-class">Delete</a>
+                    <% } %>
+                      <a href="#" class=" btn btn-class add-offer-button" data-product-id="<%= product._id %>">Add
+                        offer</a>
+
+              </td>
+            </tr>
+            <div id="addOfferModal_<%= product._id %>" class="modal">
+              <div class="modal-content">
+                <span class="close" data-product-id="<%= product._id %>">&times;</span>
+                <div class="form-group">
+                  <label for="offerPercentage_<%= product._id %>">Offer Percentage:</label>
+                  <input type="text" class="form-control" id="offerPercentage_<%= product._id %>" name="offerPercentage"
+                    placeholder="Percentage">
+                </div>
+
+                <div class="form-group">
+                  <label for="startDate_<%= product._id %>">Start Date:</label>
+                  <input type="date" class="form-control" id="startDate_<%= product._id %>" name="startDate">
+                </div>
+
+                <div class="form-group">
+                  <label for="endDate_<%= product._id %>">End Date:</label>
+                  <input type="date" class="form-control" id="endDate_<%= product._id %>" name="endDate">
+                </div>
+
+
+                <br>
+                <button class="btn btn-class confirm-addOffer-button" data-product-id="<%= product._id %>">
+                  Save
+                </button>
+              </div>
+            </div>
+            <!-- Button to trigger the modal -->
+
+
+            <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+
+    <br>
+    <% for (let j=1; j <=totalPages; j++) { %>
+      <a href="?page=<%= j %>">
+        <span class="page-number">
+          <%= j %>
+        </span>
+      </a>
+      <% } %>
+        <br>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+  <script>
+    function showCancelModal(productId) {
+      const modal = document.getElementById(`addOfferModal_${productId}`);
+      modal.style.display = 'block';
+    }
+
+
+    function closeCancelModal(productId) {
+      const modal = document.getElementById(`addOfferModal_${productId}`);
+      modal.style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const addOfferButtons = document.querySelectorAll('.add-offer-button');
+
+      addOfferButtons.forEach(function (button) {
+        button.addEventListener('click', function (e) {
+          e.preventDefault(); // Prevent the default link behavior
+          const productId = button.getAttribute('data-product-id');
+          showCancelModal(productId);
+        });
+      });
+
+      const closeButtons = document.querySelectorAll('.close');
+
+      closeButtons.forEach(function (closeButton) {
+        closeButton.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const productId = closeButton.getAttribute('data-product-id');
+          closeCancelModal(productId);
+        });
+      });
+
+      const modalButtons = document.querySelectorAll('.confirm-addOffer-button');
+      modalButtons.forEach((button) => {
+        button.addEventListener('click', function () {
+          const productId = button.getAttribute('data-product-id');
+          const offerPercentage = document.getElementById(`offerPercentage_${productId}`).value;
+          const startDate = document.getElementById(`startDate_${productId}`).value;
+          const endDate = document.getElementById(`endDate_${productId}`).value;
+          const data = {
+            productId: productId,
+            offerPercentage: offerPercentage,
+            startDate: startDate,
+            endDate: endDate
+          };
+
+          fetch('/admin/addProductOffer', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          })
+            .then(response => response.json())
+            .then((data) => {
+              const modal = document.getElementById(`addOfferModal_${productId}`);
+              modal.style.display = 'none';
+
+             if (data.offerAdded) {
+                Swal.fire('Success', 'Offer added successfully!', 'success');
+              } else {
+                Swal.fire('Error', 'Failed to add offer', 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              // Handle network errors
+            });
+
+
+        });
+      });
+
+
+
+    });
+
+  </script>
+
+
+  <%- include('../partials/adminFooter') %>

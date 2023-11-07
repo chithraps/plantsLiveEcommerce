@@ -1,0 +1,198 @@
+<%- include('../partials/adminHeader') %>
+
+    <head>
+
+        <style>
+            body {
+                margin: 0;
+                overflow: hidden
+                    /* Add this line to remove the default body margin */
+            }
+
+            .row {
+                display: flex;
+                justify-content: space-between;
+                /* Adjust as needed */
+            }
+
+            .cardIcons {
+                width: 30%;
+
+                background-color: #c6c3e9;
+            }
+
+            .chartBarCard {
+                width: 90%;
+                border: none;
+            }
+
+            .chartDonutCard {
+                width: 80%;
+                border: none;
+            }
+
+            .img-class {
+                max-height: 400px;
+            }
+
+            .a-title {
+                text-decoration: none;
+                margin-left: 50px;
+                color: rgb(66, 182, 105);
+                ;
+            }
+
+            .container {
+
+                /* Adjust based on footer height and padding */
+                position: relative;
+            }
+        </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    </head>
+    <main class="main-wrap">
+
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Dashboard </h2>
+                    <p>Whole data about your business here</p>
+                </div>
+
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card card-body mb-4 cardIcons">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-primary-light"><i
+                                    class="text-primary material-icons md-monetization_on"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Revenue</h6>
+                                <span>₹<%= monthlyRevenue[0].totalRevenue %></span>
+                                <span class="text-sm">
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card card-body mb-4 cardIcons">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-success-light"><i
+                                    class="text-success material-icons md-local_shipping"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Orders</h6>
+                                <span>
+                                    <%= totalOrders[0].orderCount %>
+                                </span>
+                                <span class="text-sm">
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card card-body mb-4 cardIcons">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-warning-light"><i
+                                    class="text-warning material-icons md-qr_code"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Products</h6>
+                                <span>
+                                    <%= totalProducts %>
+                                </span>
+
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card card-body mb-4 chartBarCard">
+                        <!-- Bar Chart Container -->
+                        <canvas id="myChart" style="width: 100%; "></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card card-body mb-4 chartDonutCard">
+                        <!-- Donut Chart Container -->
+                        <canvas id="donutChart" style="width: 60%; "></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+    </main>
+
+
+    <script>
+        const datas = JSON.parse('<%- JSON.stringify(monthlySales) %>');
+        var categorySales = JSON.parse('<%- JSON.stringify(categorySales) %>');
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const xValues = datas.map(entry => {
+            const month = entry._id.month;
+            const year = entry._id.year;
+            return `${monthNames[month - 1]} ${year}`;
+        });
+
+        const yValues = datas.map(entry => entry.total);
+
+        new Chart("myChart", {
+            type: "bar",
+            data: {
+                labels: xValues,
+                datasets: [{
+                    backgroundColor: "#c6c3e9",
+                    data: yValues,
+                }],
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Total Sales",
+                        },
+                    },
+                },
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: "Monthly Sales Chart",
+                },
+            },
+        });
+
+        const categoryNames = categorySales.map((item) => item.category);
+        const categorySalesData = categorySales.map((item) => item.totalSales);
+        const backgroundColors = ["#FF5733", "#33FF57", "#3357FF"];
+
+        var donutData = {
+            labels: categoryNames,
+            datasets: [
+                {
+                    data: categorySalesData,
+                    backgroundColor: backgroundColors,
+                },
+            ],
+        };
+
+        new Chart('donutChart', {
+            type: 'doughnut',
+            data: donutData,
+            options: {
+                legend: { display: true },
+                title: {
+                    display: true,
+                    text: 'Category Sales',
+                },
+            },
+        });
+    </script>
+    <%- include('../partials/adminFooter') %>

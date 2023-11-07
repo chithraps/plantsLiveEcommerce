@@ -1,0 +1,232 @@
+<%- include('../partials/adminHeader') %>
+
+    <head>
+        
+        <style>
+            .card-header {
+                background-color: rgb(66, 182, 105);
+            }
+
+            .h3-text {
+                color: white;
+            }
+
+            .btn-class {
+                background-color: rgb(66, 182, 105);
+                color: white;
+            }
+
+            .btn-class:hover {
+                background-color: rgb(25, 95, 48);
+                color: white;
+
+            }
+
+            .image-preview-item {
+                display: inline-block;
+                margin: 5px;
+            }
+
+            .image-thumbnail {
+                max-width: 100px;
+                /* Adjust the maximum width as needed */
+                max-height: 100px;
+                /* Adjust the maximum height as needed */
+            }
+        </style>
+    </head>
+    <div class="container mt-5 mb-5 col">
+        <div class="row justify-content-center ">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="text-center h3-text">Add Product</h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/addProduct" method="POST" enctype="multipart/form-data" id="addProduct">
+                            <div class="form-group">
+                                <label for="name">Name:</label>
+                                <input type="text" class="form-control" id="name" name="name">
+                                <div class="error" id="nameError" style="color: red;"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Description:</label>
+                                <textarea class="form-control" id="description" name="description" rows="4"></textarea>
+                                <div class="error" id="descriptionError" style="color: red;"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="price">Price:</label>
+                                <input type="number" class="form-control" id="price" name="price">
+                                <div class="error" id="priceError" style="color: red;"></div>
+                            </div>
+                            <div id="image-preview" class="mt-3">
+                                <!-- Images will be displayed here -->
+                            </div>
+                            <div class="form-group">
+                                <label for="images">Upload images:</label>
+                                <input type="file" class="form-control" name="images" id="imageId" multiple>
+                                <div class="error" id="imageError" style="color: red;"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="category">Category:</label>
+                                <select class="form-control" id="category" name="productCategory">
+                                    <option value="" disabled selected>Select a category</option>
+                                    <% categories.forEach(category=> { %>
+                                        <option value="<%= category._id %>">
+                                            <%= category.name %>
+                                        </option>
+                                        <% }); %>
+                                </select>
+                                <div class="error" id="dropdownError" style="color: red;"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="name">Stock:</label>
+                                <input type="number" class="form-control" id="stock" name="stock">
+                                <div class="error" id="stockError" style="color: red;"></div>
+                            </div>
+                            <div class="error" id="stockError" style="color: red;"></div>
+                            <div class="text-center mt-4 mb-4">
+                                <button type="submit" class="btn btn-class">Submit</button>
+                            </div>
+                        </form>
+                        
+                        <% if(typeof message!=='undefined' ){ %>
+                            <p style="color: green;">
+                                <%= message %>
+                            </p>
+                            <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const form = document.getElementById("addProduct")
+        const imageInput = document.getElementById('imageId');
+        imageInput.addEventListener("change", handleImageUpload);
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+
+
+
+            clearErrors();
+
+            // Get input values
+            const name = document.getElementById("name").value;
+            const description = document.getElementById("description").value;
+            const price = document.getElementById("price").value;
+
+            const stock = document.getElementById('stock').value;
+
+            const selectedFiles = imageInput.files;
+            const selectedFile = imageInput.files[0];
+
+            const dropdown = document.getElementById("category").value;
+            if (name === "") {
+                displayError("nameError", "Name cannot be empty");
+                return;
+            }
+
+            if (description === "") {
+                displayError("descriptionError", "description cannot be empty");
+                return;
+            }
+            if (price === "" || isNaN(price) || price <= 0) {
+
+                displayError("priceError", "Price cannot be empty");
+                return;
+            }
+
+            if (stock === '' || stock <= 0) {
+
+                displayError("stockError", "Stock cannot be empty");
+                return false;
+            }
+
+
+            if (dropdown === '') {
+                displayError("dropdownError", "Please select an option from the dropdown");
+                return false;
+            }
+
+            if (!selectedFile) {
+                displayError("imageError", 'Please select an image to upload.');
+                return false; // Prevent form submission
+            }
+            for (let i = 0; i < selectedFiles.length; i++) {
+            const file = selectedFiles[i];
+
+            // Check file type (allow 'image/jpeg' and 'image/png')
+            if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
+                displayError("imageError", 'Please select a valid image file (JPEG, JPG, or PNG).');
+                return false; // Prevent form submission
+            }
+        }
+
+            // Validate name (non-empty)
+
+            form.submit();
+        });
+
+        function displayError(fieldId, errorMessage) {
+            const errorSpan = document.getElementById(fieldId);
+            errorSpan.textContent = errorMessage;
+        }
+
+        function clearErrors() {
+            const errorSpans = document.querySelectorAll(".error");
+            errorSpans.forEach(function (span) {
+                span.textContent = "";
+            });
+        }
+        
+    const imagePreview = document.getElementById('image-preview');
+    imageInput.addEventListener("change", handleImageUpload);
+
+    function handleImageUpload() {
+        clearImagePreview();
+        const files = imageInput.files;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const imageUrl = e.target.result;
+                    displayImagePreview(imageUrl, file);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    }
+
+    function displayImagePreview(imageUrl, file) {
+        const imageItem = document.createElement('div');
+        imageItem.classList.add('image-preview-item','position-relative');
+
+        const thumbnail = document.createElement('img');
+        thumbnail.classList.add('image-thumbnail');
+        thumbnail.src = imageUrl;
+        thumbnail.alt = 'Preview';
+
+        const removeButton = document.createElement('button');
+        removeButton.classList.add('btn', 'btn-sm', 'remove-button','position-absolute','top-0','start-0');
+        removeButton.innerHTML = '<i class="fas fa-times"></i>';
+        removeButton.addEventListener('click', function () {
+            // Remove the image item when the remove button is clicked
+            imageItem.remove();
+        });
+
+        imageItem.appendChild(thumbnail);
+        imageItem.appendChild(removeButton);
+
+        imagePreview.appendChild(imageItem);
+    }
+
+    function clearImagePreview() {
+        imagePreview.innerHTML = ''; // Clear all image previews
+    }
+
+
+    </script>
+    <%- include('../partials/adminFooter') %>

@@ -1,0 +1,359 @@
+<%- include('../partials/userHeader') %>
+
+    <head>
+        <style>
+            .gradient-custom {
+                /* fallback for old browsers */
+                background: #fffcfd;
+
+                /* Chrome 10-25, Safari 5.1-6 */
+                background: -webkit-linear-gradient(to right, #fffcfd, rgb(207, 198, 200));
+
+                /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+                background: linear-gradient(to right, #fffcfd, rgb(207, 198, 200))
+            }
+
+            .btn {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .btn:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+
+            .a-link {
+                text-decoration: none;
+            }
+        </style>
+    </head>
+    <section class="h-100 gradient-custom">
+
+        <div class="container py-5">
+            <div class="row d-flex justify-content-center my-4">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header py-3">
+                            <h5 class="mb-0">Cart(<%=count %>)</h5>
+                        </div>
+                        <div class="card-body">
+                            <% cart.items.forEach((item)=> { %>
+                                <!-- Single item -->
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-12 mb-4 mb-lg-0">
+                                        <!-- Image -->
+                                        <div class="bg-image hover-overlay hover-zoom ripple rounded"
+                                            data-mdb-ripple-color="light">
+                                            <img src="<%= item.productId.images[0] %>" class="w-100"
+                                                alt="<%= item.productId.name %>" />
+                                            <a href="#!">
+                                                <div class="mask" style="background-color: rgba(251, 251, 251, 0.2)">
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <!-- Image -->
+                                    </div>
+
+                                    <div class="col-lg-5 col-md-6 mb-4 mb-lg-0">
+                                        <!-- Data -->
+                                        <p><strong>
+                                                <%= item.productId.name %>
+                                            </strong></p>
+
+                                        <div class="ms-2" id="stockMessage_<%= item.productId._id %>">
+                                            <% if(item.productId.stock_count>0){ %>
+                                                <span class="text-success ms-2">In stock</span>
+                                                <%}else{ %>
+                                                    <span class="text-danger ms-2">Out of stock</span>
+                                                    <%} %>
+                                        </div>
+
+
+                                        <button type="button" class="btn btn-sm me-1 mb-2" data-mdb-toggle="tooltip"
+                                            title="Remove item">
+                                            <a href="/deleteProduct?productId=<%= item.productId._id %>"
+                                                class="text-white">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </button>
+                                        <button type="button" class="btn btn-sm mb-2" data-mdb-toggle="tooltip"
+                                            title="Move to the wish list">
+                                            <a href="/moveToWishlist?productId=<%= item.productId._id %>"
+                                                class="text-white">
+                                                <i class="fa-solid fa-heart"></i>
+                                            </a>
+                                        </button>
+                                        <!-- Data -->
+                                    </div>
+
+                                    <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                                        <!-- Quantity -->
+                                        <form>
+                                            <div class="d-flex flex-column align-items-center justify-content-center">
+                                                <label class="mb-2 d-block">Quantity</label>
+                                                <div class="input-group mb-3" style="width: 170px;">
+                                                    <button
+                                                        class="btn btn-white border border-secondary px-3 decrement-button"
+                                                        data-product-id="<%= item.productId._id %>">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <input type="number"
+                                                        class="form-control text-center border border-secondary"
+                                                        id="quantity_<%= item.productId._id %>" placeholder="1"
+                                                        aria-label="Quantity" value="<%= item.quantity %>" readonly />
+                                                    <button
+                                                        class="btn btn-white border border-secondary px-3 increment-button"
+                                                        data-product-id="<%= item.productId._id %>">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        <!-- Quantity -->
+
+                                        <!-- Price -->
+                                        <% function calculateDiscountedPrice(originalPrice, discountPercentage) { %>
+                                            <% if (originalPrice && discountPercentage) { %>
+                                                <% const discountedPrice=parseInt(originalPrice - (originalPrice *
+                                                    (discountPercentage / 100))); %>
+                                                    <% if (!isNaN(discountedPrice)) { %>
+                                                        <% return discountedPrice; %>
+                                                            <% } %>
+                                                                <% } %>
+                                                                    <% return originalPrice; %>
+                                                                        <% } %>
+                                                                            <p class="text-start text-md-center">
+                                                                                <!-- Check if the product has an offer -->
+                                                                                <% if (item.productId.offer &&
+                                                                                    item.productId.offer.startDate <=new
+                                                                                    Date() &&
+                                                                                    item.productId.offer.endDate>= new
+                                                                                    Date()) { %>
+                                                                                    <s><i
+                                                                                            class="fa-solid fa-indian-rupee-sign"></i>
+                                                                                        <%= item.productId.price %>
+                                                                                    </s>
+                                                                                    <span class="text-success ms-2">
+                                                                                        <%= calculateDiscountedPrice(item.productId.price,
+                                                                                            item.productId.offer.discountPercentage)
+                                                                                            %>
+
+                                                                                    </span>
+                                                                                    <% } else { %>
+                                                                                        <i
+                                                                                            class="fa-solid fa-indian-rupee-sign"></i>
+                                                                                        <%= item.productId.price %>
+                                                                                            <% } %>
+                                                                            </p>
+                                                                            <!-- Price -->
+                                    </div>
+                                </div>
+                                <!-- Single item -->
+
+                                <hr class="my-4" />
+
+
+                                <% }); %>
+
+                                    <% if(typeof message!=='undefined' ){ %>
+                                        <p style="color: green;">
+                                            <%= message %>
+                                        </p>
+                                        <% } %>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <p><strong>Expected shipping delivery</strong></p>
+                            <p class="mb-0">12.10.2023 - 14.10.2023</p>
+                        </div>
+                    </div>
+                    <div class="card mb-4 mb-lg-0">
+                        <div class="card-body">
+                            <p><strong>We accept</strong></p>
+                            <img class="me-2" width="45px"
+                                src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce-gateway-stripe/assets/images/visa.svg"
+                                alt="Visa" />
+                            <img class="me-2" width="45px"
+                                src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce-gateway-stripe/assets/images/amex.svg"
+                                alt="American Express" />
+                            <img class="me-2" width="45px"
+                                src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce-gateway-stripe/assets/images/mastercard.svg"
+                                alt="Mastercard" />
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-header py-3">
+                            <h5 class="mb-0">Summary</h5>
+                        </div>
+                        <div class="card-body">
+
+                            <ul class="list-group list-group-flush">
+                                <li
+                                    class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+                                    Total price
+                                    <span id="totalPriceDisplay"><i class="fa-solid fa-indian-rupee-sign"></i>
+                                        <%= totalPrice %>
+                                    </span>
+
+                                </li>
+
+
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    Shipping
+                                    <span><i class="fa-solid fa-indian-rupee-sign"></i>40</span>
+                                </li>
+                                <li
+                                    class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                                    <div>
+                                        <strong>Total amount</strong>
+                                        <strong>
+                                            <p class="mb-0">(including GST)</p>
+                                        </strong>
+                                    </div>
+                                    <span id="totalAmountDisplayed"> <i class="fa-solid fa-indian-rupee-sign"></i>
+                                        <%= totalPrice + 40 %>
+                                    </span>
+                                </li>
+                            </ul>
+
+
+                            <button type="button" class="btn btn-sm me-1 mb-2" data-mdb-toggle="tooltip" id="checkout">
+                                <a href="/goToCheckout" class="text-white a-link">
+                                    Checkout
+                                </a>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+    <script>
+
+
+
+        document.querySelectorAll('.increment-button').forEach((button) => {
+            button.addEventListener('click', async (e) => {
+                e.preventDefault();
+
+                const productId = button.getAttribute('data-product-id');
+                const quantityInput = document.getElementById(`quantity_${productId}`);
+                const currentQuantity = parseInt(quantityInput.value);
+
+                // Increment the quantity locally
+                const newQuantity = currentQuantity + 1;
+                quantityInput.value = newQuantity;
+
+                // Send an AJAX request to update the cart
+                try {
+                    const response = await fetch('/updateCart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ productId, quantity: newQuantity }),
+                    });
+                    const responseJson = await response.json();
+                    if (response.ok) {
+                        const updatedPrice = responseJson.totalPrice;
+                        const totalPriceElement = document.getElementById('totalPriceDisplay');
+                        totalPriceElement.innerHTML = `<i class="fa-solid fa-indian-rupee-sign"></i>${updatedPrice}`;
+
+                        const totalAmountElement = document.getElementById('totalAmountDisplayed');
+                        const totalAmount = updatedPrice + 40;
+                        totalAmountElement.innerHTML = `<i class="fa-solid fa-indian-rupee-sign"></i><strong>${totalAmount}</strong>`;
+
+                        if (responseJson.message) {
+
+                            const messageContainer = document.getElementById(`stockMessage_${productId}`);
+                            messageContainer.classList.add('text-success');
+                            messageContainer.textContent = responseJson.message;
+
+                            if (responseJson.message === "Only a few left; you can't add further") {
+                                quantityInput.value = newQuantity - 1;
+                                const incrementButton = document.querySelector(`.increment-button[data-product-id="${productId}"]`);
+                                incrementButton.disabled = true;
+                            }
+                        }
+                    }
+
+                    if (!response.ok) {
+                        // Handle the case where the server returns an error
+                        console.error('Error:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+        document.querySelectorAll('.decrement-button').forEach((button) => {
+            button.addEventListener('click', async (e) => {
+                e.preventDefault();
+
+                const productId = button.getAttribute('data-product-id');
+                const quantityInput = document.getElementById(`quantity_${productId}`);
+                const currentQuantity = parseInt(quantityInput.value);
+
+                // Increment the quantity locally
+                if (currentQuantity > 1) {
+                    const newQuantity = currentQuantity - 1;
+
+                    quantityInput.value = newQuantity;
+
+                    // Send an AJAX request to update the cart
+                    try {
+                        const response = await fetch('/updateCart', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ productId, quantity: newQuantity }),
+                        });
+                        const responseJson = await response.json();
+                        if (response.ok) {
+
+                            const updatedPrice = responseJson.totalPrice;
+                            const totalPriceElement = document.getElementById('totalPriceDisplay');
+                            totalPriceElement.innerHTML = `<i class="fa-solid fa-indian-rupee-sign"></i>${updatedPrice}`;
+
+                            const totalAmountElement = document.getElementById('totalAmountDisplayed');
+                            const totalAmount = updatedPrice + 40;
+                            totalAmountElement.innerHTML = `<i class="fa-solid fa-indian-rupee-sign"></i><strong>${totalAmount}</strong>`;
+                            const incrementButton = document.querySelector(`.increment-button[data-product-id="${productId}"]`);
+
+                            if (responseJson.message) {
+
+                                const messageContainer = document.getElementById(`stockMessage_${productId}`);
+                                messageContainer.classList.add('text-success');
+                                messageContainer.textContent = responseJson.message;
+                                incrementButton.disabled = false;
+                                if (responseJson.message === "Only a few left; you can't add further") {
+                                    quantityInput.value = newQuantity - 1;
+                                    incrementButton.disabled = true;
+                                }
+
+                            }
+                        }
+                        if (!response.ok) {
+                            // Handle the case where the server returns an error
+                            console.error('Error:', response.statusText);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                }
+            });
+        });
+
+
+    </script>
+
+    <%- include('../partials/footer') %>

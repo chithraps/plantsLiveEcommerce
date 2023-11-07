@@ -1,0 +1,480 @@
+<%- include('../partials/userHeader') %>
+
+    <head>
+        <style>
+            .container-class {
+                display: flex;
+                flex-direction: column;
+
+                /* Ensure the container takes at least the full viewport height */
+                background: linear-gradient(to right, #fffcfd, rgb(207, 198, 200));
+            }
+
+            /* Add a class for the content container within the flex layout */
+            .content-container {
+                flex: 1;
+                /* Allow the content container to grow and take available space */
+                overflow-y: auto;
+                /* Add a vertical scrollbar if needed */
+                padding-bottom: 50px;
+
+            }
+
+            .blur-label {
+                filter: blur(10px);
+                /* Apply a blur effect to the label text */
+            }
+
+            .btn {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .btn:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+
+            .card-text {
+                margin-right: 15px;
+
+            }
+        </style>
+
+    </head>
+    <div class="container mt-5 mb-4 container-class">
+        <div class="row">
+            <!-- Address and Payment on the Left -->
+            <aside class="col-md-6">
+                <h5>SHIPPING ADDRESS</h5>
+                <section class="mt-2">
+
+                    <!-- Button to add a new address -->
+                    <button class="btn  mt-3" id="addNewAddressBtn">ADD NEW ADDRESS</button>
+
+                    <!-- Address entry fields for saving a new address (initially hidden) -->
+                    <form class="mt-3" id="newAddressForm" style="display: none;" action="/addNewAddress" method="post">
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="fullName" name="fullName"
+                                placeholder="Full Name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="houseName" class="form-label">House Name</label>
+                            <input type="text" class="form-control" id="houseName" name="houseName"
+                                placeholder="House Name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="street" class="form-label">Street</label>
+                            <input type="text" class="form-control" id="street" name="street" placeholder="Street ">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newCity" class="form-label">City</label>
+                            <input type="text" class="form-control" id="newCity" name="city" placeholder="City">
+                        </div>
+                        <div class="mb-3">
+                            <label for="state" class="form-label">State</label>
+                            <input type="text" class="form-control" id="state" name="state" placeholder="State">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPostalCode" class="form-label">Postal Code</label>
+                            <input type="number" class="form-control" id="newPostalCode" name="postalCode"
+                                placeholder="Postal Code">
+                        </div>
+                        <button type="submit" class="btn">Save Address</button>
+                    </form>
+                </section>
+                <!-- Existing Address Section (if available) -->
+
+
+                <% if(typeof addresses!=='undefined' ){ %>
+                    <h5 class="mt-3">SELECT SHIPPING ADDRESS:</h5>
+                    <% addresses.forEach((address, index)=> { %>
+                        <input type="radio" id="address_<%= index %>" name="selectedAddress" value="<%= index %>"
+                            required>
+                        <div class="card " style="width: 350px;">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">
+                                        <%= address.fullName %>
+                                    </h5>
+                                    <p class="card-text">
+                                        <%= address.houseName %>,
+                                            <%= address.street %>, <%= address.city %>, <%= address.postalCode %>
+                                    </p>
+                                </div>
+                                <div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <% }); %>
+                            <% }; %>
+
+
+
+
+
+                                <!-- Payment Method Section -->
+                                <section class="mt-3 mb-5">
+                                    <h5>PAYMENT METHOD</h5>
+                                    <!-- Payment method options (e.g., credit card, COD) can be displayed here -->
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="cod"
+                                            value="Cash on Delivery" checked>
+                                        <label class="form-check-label" for="cod">
+                                            Cash on Delivery (COD)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="razorpay"
+                                            value="Razorpay">
+                                        <label class="form-check-label" for="razorpay">
+                                            Razorpay
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="wallet"
+                                            value="Wallet" <%=(hasSufficientBalance) ? '' : 'disabled' %>
+                                            <label class="form-check-label <%= (hasSufficientBalance) ? 'blur-label' : '' %>" for="wallet">
+                                                Wallet
+                                            </label>
+                                    </div>
+
+                                </section>
+            </aside>
+
+            <!-- Order Summary and Items Purchasing on the Right -->
+            <main class="col-md-6 content-container">
+                <!-- Order Summary Section -->
+                <section>
+
+
+                    <!-- Product Card -->
+                    <h5>ORDER SUMMARY</h5>
+
+                    <!-- Product Cards -->
+                    <% cart.items.forEach((item)=> { %>
+                        <div class="card mb-3">
+                            <div class="row g-0">
+                                <!-- Left Side (Image) -->
+                                <div class="col-md-4">
+                                    <img src="<%= item.productId.images[0] %>" class="img-fluid rounded-start"
+                                        alt="<%= item.productId.name %>">
+                                </div>
+                                <!-- Right Side (Details) -->
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <%= item.productId.name %>
+                                        </h5>
+                                        <p class="card-text"><strong>Size:</strong>
+                                            <%= item.size %>
+                                        </p>
+                                        <p class="card-text"><strong>Quantity:</strong>
+                                            <%= item.quantity %>
+                                        </p>
+                                        <p class="card-text"><strong>Price:</strong> <i
+                                                class="fa-solid fa-indian-rupee-sign"></i>
+                                            <%= item.productId.price %>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+
+
+                            <!-- Price Details Card -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Price Details</h5>
+
+                                    <!-- Coupon Code Section (Moved to the Top) -->
+                                    <button type="button" class="btn" id="showCouponsBtn">Show Available
+                                        Coupons</button>
+                                    <div id="couponList" style="display: none;">
+                                        <!-- Coupons will be displayed here -->
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="applyCouponCheckbox">
+                                        <label class="form-check-label" for="applyCouponCheckbox">I have a Coupon
+                                            Code</label>
+                                    </div>
+                                    <div class="form-group" id="couponCodeContainer" style="display: none;">
+                                        <label for="couponCode">Coupon Code:</label>
+                                        <input type="text" class="form-control" id="couponCode" name="couponCode"
+                                            style="width: 200px;">
+                                        <br>
+                                        <button type="button" class="btn" id="applyCouponBtn">Apply</button>
+                                    </div>
+                                    <p id="couponMessage"></p>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <!-- Price, Discount, and New Total -->
+                                            <p class="card-text">Price: <span id="totalPriceDisplay"><i
+                                                        class="fa-solid fa-indian-rupee-sign"></i>
+                                                    <%= totalPrice %>
+                                                </span></p>
+                                            <p class="card-text" id="discountAmountHeading"></p>
+                                            <p class="card-text" id="newTotalPriceHeading"></p>
+
+                                            <!-- Shipping -->
+                                            <p class="card-text">Shipping: <i
+                                                    class="fa-solid fa-indian-rupee-sign"></i>40</p>
+                                            <hr>
+
+                                            <!-- Total Price -->
+                                            <p class="card-text"><strong>Total Price: </strong><span
+                                                    id="totalAmountDisplayed"><i
+                                                        class="fa-solid fa-indian-rupee-sign"></i>
+                                                    <%= totalPrice + 40 %>
+                                                </span></p>
+                                            <input type="hidden" name="totalPrice" value="<%= totalPrice + 40.00 %>">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                </section>
+
+                <!-- Items Purchasing Section -->
+
+
+                <!-- Place Order Button -->
+                <button type="button" class="btn mt-3 mb-5" id="placeOrderBtn">Place Order</button>
+            </main>
+
+            </main>
+
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        // JavaScript to show/hide the "Add New Address" form
+        document.addEventListener("DOMContentLoaded", function () {
+            const addNewAddressBtn = document.getElementById("addNewAddressBtn");
+            const newAddressForm = document.getElementById("newAddressForm");
+            const showCouponsBtn = document.getElementById("showCouponsBtn");
+            const couponList = document.getElementById("couponList");
+
+
+
+            let isFormVisible = false; // Flag to track form visibility
+
+            addNewAddressBtn.addEventListener("click", function () {
+                if (!isFormVisible) {
+                    newAddressForm.style.display = "block";
+                    isFormVisible = true;
+                } else {
+                    newAddressForm.style.display = "none";
+                    isFormVisible = false;
+                }
+            });
+
+
+            const applyCouponBtn = document.getElementById("applyCouponBtn");
+            const couponCodeInput = document.getElementById("couponCode");
+            const couponMessage = document.getElementById("couponMessage");
+            const newTotalPrice = document.getElementById("newTotalPriceHeading")
+            const totalPriceDisplay = document.getElementById("totalPriceDisplay");
+            const netTotalAmount = document.getElementById("totalAmountDisplayed")
+            let newTotalAmount = 0;
+
+            applyCouponBtn.addEventListener("click", function () {
+
+                const couponCode = couponCodeInput.value;
+                const totalPrice = parseFloat(totalPriceDisplay.textContent.replace(/\D/g, ''));
+
+                fetch('/validateCoupon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ couponCode: couponCode, totalPrice }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.isValid) {
+
+                            couponMessage.textContent = data.message;
+                            const discountAmount = data.discountAmount; // Get the discount amount from the response
+                            const newTotalPrice = data.newTotalPrice; // Get the new total price after discount from the response
+                            newTotalAmount = data.newTotalPrice + 40;
+
+                            // Update the content of the HTML elements
+
+                            const discountAmountHeading = document.getElementById('discountAmountHeading');
+                            discountAmountHeading.innerHTML = `<span id="discountAmountHeading">Discount</span>
+                                                               <span id="discountAmount" style="color: red;">
+                                                              - <i class="fa-solid fa-indian-rupee-sign"></i>${discountAmount}</span>`;
+
+
+                            const newTotalPriceHeading = document.getElementById('newTotalPriceHeading');
+                            newTotalPriceHeading.innerHTML = `<span id="discountAmountHeading">Price</span>
+                                                               <span id="newTotalPrice">
+                                                               <i class="fa-solid fa-indian-rupee-sign"></i>${newTotalPrice}</span>`;
+                            netTotalAmount.innerHTML = `<i class="fa-solid fa-indian-rupee-sign"></i> ${newTotalAmount}`;
+
+
+                        } else {
+
+                            couponMessage.textContent = data.message;
+                        }
+                    })
+                    .catch((error) => {
+                        alert(error.message)
+                        couponMessage.textContent = 'Error occurred while validating the coupon.';
+                    });
+            });
+
+            const placeOrderBtn = document.getElementById("placeOrderBtn");
+
+
+            placeOrderBtn.addEventListener("click", function () {
+                // Collect form data and send it to the server
+                const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+                const totalPrice = document.querySelector('input[name="totalPrice"]').value;
+
+                if (!selectedAddress || !paymentMethod) {
+                    alert("Please select a shipping address and payment method.");
+                    return;
+                }
+
+
+                // Prepare the data to send to the server
+                const orderData = {
+                    selectedAddress: selectedAddress.value,
+                    paymentMethod: paymentMethod.value,
+                    totalPrice: totalPrice,
+                    newTotalAmount: newTotalAmount
+                };
+
+                // Send an AJAX request to place the order
+                // Replace '/placeOrder' with your actual server endpoint
+                fetch("/placeOrder", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(orderData),
+                })
+                    .then((response) => response.json())
+                    .then(async (data) => {
+
+                        if (data.codStatus === true) {
+
+                            window.location.href = '/orderConfirmation'
+                        } else if (data.status === false) {
+                            await Swal.fire('Error', data.message, 'error').then(() => {
+                                window.location.href = '/viewCart'; // Reload the page after the user acknowledges the alert
+                            });;
+
+                        } else if (data.status === true) {
+                            window.location.href = '/orderConfirmation'
+                        } else {
+                            razorpayPayment(data)
+                        }
+                    })
+
+            });
+
+            showCouponsBtn.addEventListener("click", () => {
+                // Make an AJAX request to fetch available coupons
+                fetch("/getAvailableCoupons")
+                    .then((response) => response.json())
+                    .then((data) => {
+                        // Update the HTML to display the fetched coupons
+                        const couponHTML = data.coupons.map((coupon) => {
+                            return `<div class="coupon">${coupon.code} : ${coupon.description}</div>`;
+                        }).join("");
+                        couponList.innerHTML = couponHTML;
+
+                        // Display the coupon list
+                        couponList.style.display = "block";
+                    })
+                    .catch((error) => {
+                        console.error("Error fetching coupons:", error);
+                    });
+            });
+
+            const applyCouponCheckbox = document.getElementById("applyCouponCheckbox");
+            const couponCodeContainer = document.getElementById("couponCodeContainer");
+
+            applyCouponCheckbox.addEventListener("change", function () {
+                const couponList = document.getElementById("couponList");
+                if (applyCouponCheckbox.checked) {
+                    couponCodeContainer.style.display = "block"; // Show the input container
+                    couponList.style.display = "none"
+                } else {
+                    couponCodeContainer.style.display = "none"; // Hide the input container
+                }
+            });
+        });
+
+
+
+        function razorpayPayment(order) {
+
+            var options = {
+                "key": "rzp_test_zr6BwtMKVZSmxt", // Enter the Key ID generated from the Dashboard
+                "amount": order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+                "currency": "INR",
+                "name": "PlantsLive", //your business name
+                "description": "Test Transaction",
+                "image": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.vecteezy.com%2Ffree-vector%2Fplant-logo&psig=AOvVaw0W6RcZcKOX-gjOqL7Y7ZzV&ust=1696357615551000&source=images&cd=vfe&ved=0CBEQjRxqFwoTCPDO19z-14EDFQAAAAAdAAAAABAE",
+                "order_id": order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+
+                "handler": function (response) {
+
+                    verifyPayment(response, order);
+                },
+
+                "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information especially their phone number
+                    "name": "Gaurav Kumar", //your customer's name
+                    "email": "gaurav.kumar@example.com",
+                    "contact": "9000090000" //Provide the customer's phone number for better conversion rates 
+                },
+                "notes": {
+                    "address": "Razorpay Corporate Office"
+                },
+                "theme": {
+                    "color": "#3399cc"
+                }
+            };
+            var rzp1 = new Razorpay(options);
+            rzp1.open();
+        }
+
+        function verifyPayment(payment, order) {
+
+            const data = {
+                payment,
+                order
+            }
+            fetch("/verifyPayment", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.Status === true) {
+                        window.location.href = "/orderConfirmation"
+                    } else {
+                        alert("payment failed")
+                    }
+                })
+        }
+
+
+    </script>
+    <%- include('../partials/footer') %>

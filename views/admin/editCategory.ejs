@@ -1,0 +1,105 @@
+<%- include('../partials/adminHeader') %>
+
+    <head>
+        <style>
+            .footer-class {
+                position: fixed;
+            }
+
+            .h3-color {
+                color: rgb(66, 182, 105);
+            }
+
+            .button-class {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .button-class:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+        </style>
+    </head>
+    <section class="container mt-5 mb-5 col">
+        <div class="row content d-flex justify-content-center align-items-center">
+            <div class="col-md-5">
+                <div class="box shadow bg-white p-4">
+                    <h3 class="mb-4 text-center fs-1 h3-color">Edit Category</h3>
+
+                    <form action="/admin/editCategory" method="post" class="mb-3" id="editCategory">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control rounded-0" id="name" placeholder="Name" name="name"
+                                value="<%= categoryData.name%>" >
+                            <label for="floatingInput" name="name">Name</label>
+                            <div class="error" id="nameError" style="color: red;"></div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control rounded-0" id="description" placeholder="Description"
+                                name="description" value="<%= categoryData.description %>" >
+                            <label for="floatingInput" name="description">Description</label>
+                           
+                            <div class="error" id="descriptionError" style="color: red;"></div>
+                        </div>
+
+                        <input type="hidden" name="id" value="<%= categoryData._id%>">
+
+                        <div class="d-grid gap-2 mb-3">
+                            <button type="submit" class="btn  btn-lg border-0 rounded-0 button-class">Submit</button>
+                        </div>
+
+                    </form>
+
+                    <% if(typeof message!=='undefined' ){ %>
+                        <p style="color: green;">
+                            <%= message %>
+                        </p>
+                        <% } %>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <script>
+        const form = document.getElementById("editCategory")
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+
+
+
+            clearErrors();
+
+            // Get input values
+            const name = document.getElementById("name").value;
+            const description = document.getElementById("description").value;
+
+
+            // Validate name (non-empty)
+            if (name === "") {
+                displayError("nameError", "Name cannot be empty");
+                return;
+            }
+            if (description === "") {
+                displayError("descriptionError", "Description cannot be empty");
+                return;
+            }
+
+
+
+            form.submit();
+        });
+
+        function displayError(fieldId, errorMessage) {
+            const errorSpan = document.getElementById(fieldId);
+            errorSpan.textContent = errorMessage;
+        }
+
+        function clearErrors() {
+            const errorSpans = document.querySelectorAll(".error");
+            errorSpans.forEach(function (span) {
+                span.textContent = "";
+            });
+        }
+    </script>
+    <%- include('../partials/adminFooter') %>

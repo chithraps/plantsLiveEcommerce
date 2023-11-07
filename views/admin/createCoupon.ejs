@@ -1,0 +1,149 @@
+<%- include('../partials/adminHeader') %>
+
+    <head>
+        <style>
+            .card-header {
+                background-color: rgb(66, 182, 105);
+            }
+
+            .h3-text {
+                color: white;
+            }
+
+            .btn-class {
+                background-color: rgb(66, 182, 105);
+                color: white;
+            }
+
+            .btn-class:hover {
+                background-color: rgb(25, 95, 48);
+                color: white;
+
+            }
+        </style>
+    </head>
+    <div class="container mt-5 mb-5 col">
+        <div class="row justify-content-center ">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="text-center h3-text">Create Coupon</h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/createCoupon" method="post" id="createCouponCode">
+                            <div class="form-group">
+                                <label for="code">Coupon Code:</label>
+                                <input type="text" class="form-control" id="code" name="code">
+                            </div>
+                            <div class="form-group">
+                                <label for="codeDescription">Code Description:</label>
+                                <input type="text" class="form-control" id="codeDescription" name="description">
+                            </div>
+                            <div class="form-group">
+                                <label for="discountType">Discount Type</label>
+                                <select class="form-control" id="discountType" name="discountType">
+                                    <option value="percentage">Percentage</option>
+                                    <option value="fixed">Fixed Amount</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="discountAmountField" style="display: none;">
+                                <label for="discountAmount">Discount Amount</label>
+                                <input type="number" class="form-control" id="discountAmount" name="discountAmount"
+                                    placeholder="Discount Amount">
+                            </div>
+                            <div class="form-group" id="discountPercentgeField">
+                                <label for="discountPercentage">Discount Percentage</label>
+                                <input type="number" class="form-control" id="discountPercentage"
+                                    name="discountPercentage" placeholder="Discount Percentage">
+                            </div>
+                            <div class="form-group">
+                                <label for="validFrom">Valid From:</label>
+                                <input type="date" class="form-control" id="validFrom" name="validFrom">
+                            </div>
+                            <div class="form-group">
+                                <label for="validTo">Valid To:</label>
+                                <input type="date" class="form-control" id="validTo" name="validTo">
+                            </div>
+
+                            <div class="text-center mt-4 mb-4">
+                                <button type="submit" class="btn btn-class">Submit</button>
+                            </div>
+                        </form>
+                        <div class="error" id="Error" style="color: red;"></div>
+                        <% if(typeof message!=='undefined' ){ %>
+                            <p style="color: green;">
+                                <%= message %>
+                            </p>
+                            <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const discountTypeSelect = document.getElementById('discountType');
+        const discountAmountField = document.getElementById('discountAmountField');
+        const discountPercentgeField = document.getElementById('discountPercentgeField');
+
+        discountTypeSelect.addEventListener('change', function () {
+            if (discountTypeSelect.value === 'fixed') {
+                discountAmountField.style.display = 'block';
+                discountPercentgeField.style.display = 'none';
+            } else {
+                discountAmountField.style.display = 'none';
+                discountPercentgeField.style.display = 'block';
+            }
+
+        });
+
+        const form = document.getElementById("createCouponCode")
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            clearErrors();
+            // Get input values
+            const couponCode = document.getElementById("code").value;
+            const codeValidFrom = document.getElementById("validFrom").value;
+            const codeValidTo = document.getElementById("validTo").value;
+            const codeDiscountType = document.getElementById("discountType").value;
+            const codeDiscountAmount = document.getElementById("discountAmount").value;
+
+            if (couponCode === "") {
+                displayError("Error", "Code can't be empty");
+                return;
+            }
+
+            if (codeValidFrom === "") {
+                displayError("Error", "Date field can't be empty");
+                return;
+            }
+            if (codeValidTo === "") {
+
+                displayError("Error", "Date field can't be empty");
+                return;
+            }
+            if (codeDiscountType === "fixed") {
+                if (codeDiscountAmount === "") {
+                    displayError("Error", "Discount amount can't be empty");
+                    return;
+                }
+            }
+
+
+            form.submit();
+        });
+
+        function displayError(fieldId, errorMessage) {
+            const errorSpan = document.getElementById(fieldId);
+            errorSpan.textContent = errorMessage;
+        }
+
+        function clearErrors() {
+            const errorSpans = document.querySelectorAll(".error");
+            errorSpans.forEach(function (span) {
+                span.textContent = "";
+            });
+        }
+    </script>
+    <%- include('../partials/adminFooter') %>

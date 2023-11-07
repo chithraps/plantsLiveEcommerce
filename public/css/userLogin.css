@@ -1,0 +1,43 @@
+.divider:after,
+.divider:before {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #eee;
+}
+
+.h-custom {
+    height: calc(100% - 73px);
+}
+
+@media (max-width: 450px) {
+    .h-custom {
+        height: 100%;
+    }
+}
+
+.a-link {
+    color: rgb(66, 182, 105);
+}
+
+.button-class {
+    background-color: rgb(66, 182, 105);
+    color: white;
+}
+.button-class:hover{
+    background-color: rgb(36, 61, 40);
+    color: white;
+}
+.login-section {
+    background-image: url('/images/bgLogin.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    /* Optional: Keep the image fixed when scrolling */
+    margin: 0;
+    padding: 0;
+}
+.h3-color{
+    color: rgb(66, 182, 105);
+}

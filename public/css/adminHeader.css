@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+  padding: 0;
+
+
+  min-height: 100vh;
+}
+
+.navbar .nav-item:hover .dropdown-menu {
+  display: block;
+}
+
+.navbar-nav .nav-item {
+  margin-right: 30px;
+  margin-left: 30px;
+  /* Add space between items */
+}
+
+.navbar {
+  background-color: #ecd4d4;
+  height: 80px;
+}

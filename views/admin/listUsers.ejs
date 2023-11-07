@@ -1,0 +1,75 @@
+<%- include('../partials/adminHeader') %>
+<head>
+    <style>
+         a {
+                text-decoration: none;
+            }
+
+            .page-number {
+                margin: 0 10px;
+                /* Adjust the margin as needed */
+            }
+    </style>
+</head>
+    <div class="container mt-4 col">
+        <h1>User List</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Mobile</th>
+                    <th>verified</th>
+                    <th>status</th>
+                    <th>Block/Unblock</th>
+                    <th>Action</th>
+                </tr>
+
+            </thead>
+            <tbody>
+                <% users.forEach(user=> { %>
+                    <tr>
+                        <td>
+                            <%= user.name %>
+                        </td>
+                        <td>
+                            <%= user.email %>
+                        </td>
+                        <td>
+                            <%= user.mobile %>
+                        </td>
+                        <td>
+                            <%= user.is_verified %>
+                        </td>
+                        <td>
+                            <% if(user.is_Blocked){ %>
+                                <p>Blocked</p>
+                                <% }else{ %>
+                                    <p>Active</p>
+                                    <%}%>
+                        </td>
+                        <td>
+
+                            <a href="/admin/blockOrUnblock?id=<%= user._id %>"> Block/Unblock</a>
+                        </td>
+                        <td>
+                            <a href="/admin/edit?id=<%= user._id %>"> edit</a>
+
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+        </table>
+        <br>
+        <br>
+        <% for (let j=1; j <=totalPages; j++) { %>
+            <a href="?page=<%= j %>">
+                <span class="page-number">
+                    <%= j %>
+                </span>
+            </a>
+            <% } %>
+                <br>
+                <br>
+    </div>
+    <%- include('../partials/adminFooter') %>

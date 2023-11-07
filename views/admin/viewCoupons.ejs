@@ -1,0 +1,100 @@
+<%- include('../partials/adminHeader') %>
+
+    <head>
+        <style>
+            .btn-class {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .btn-class:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+
+            .container {
+                overflow-x: hidden !important;
+                /* Hide horizontal overflow */
+                max-width: 1100px;
+                overflow-y: auto;
+                /* Add a vertical scrollbar if necessary */
+            }
+
+            a {
+                text-decoration: none;
+            }
+        </style>
+    </head>
+    <div class="container mt-4 mb-3">
+        <h1>Coupons</h1>
+        <div class="row">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Coupon Code</th>
+                        <th>Discount Type</th>
+                        <th>Discount</th>
+                        <th>valid From</th>
+                        <th>Valid To</th>
+                        <th>Max Uses</th>
+                        <th>Current Uses</th>
+                        <th>Is Deleted</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% coupons.forEach(coupon=> { %>
+                        <tr>
+                            <td>
+                                <%= coupon.code %>
+                            </td>
+                            <td>
+                                <%= coupon.discountType %>
+                            </td>
+                            <td>
+                                <% if (coupon.discountType==='percentage' ) { %>
+                                    <%= coupon.discountPercentage %>%
+                                        <% } else if (coupon.discountType==='fixed' ) { %>
+                                            <i class="fa-solid fa-indian-rupee-sign"></i><%= coupon.discountAmount %> 
+                                                <% } %>
+                            </td>
+                            <td>
+                                <%= coupon.validFrom.toDateString() %>
+                            </td>
+                            <td>
+                                <%= coupon.validTo.toDateString() %>
+                            </td>
+                            <td>
+                                <%= coupon.maxUses %>
+                            </td>
+                            <td>
+                                <%= coupon.currentUses %>
+                            </td>
+                            <td>
+                                <%= coupon.isDeleted %>
+                            </td>
+                            <td>
+                                <% if (new Date()> coupon.validTo) { %>
+                                    <span style="color: red;">Expired</span>
+                                    <% } else { %>
+                                        <span style="color: green;">Active</span>
+                                        <% } %>
+                            </td>
+                            <td>
+                                <a href="/admin/editCoupon?id=<%= coupon._id %>" class="btn btn-class">Edit</a>
+                                <% if (coupon.isDeleted) { %>
+                                    <a href="/admin/deleteCoupon?id=<%= coupon._id %>"
+                                        class="btn btn-class">Activate</a>
+                                    <% } else { %>
+                                        <a href="/admin/deleteCoupon?id=<%= coupon._id %>"
+                                            class="btn btn-class">Delete</a>
+                                        <% } %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <%- include('../partials/adminFooter') %>

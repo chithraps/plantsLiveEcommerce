@@ -1,0 +1,356 @@
+<%- include('../partials/userHeader') %>
+
+    <head>
+        <style>
+            .container-class {
+                min-height: 400px;
+                /* Adjust the value to your desired minimum height */
+            }
+
+            .card {
+                background-color: rgb(247, 247, 247);
+            }
+
+            .btn {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .btn:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.7);
+            }
+
+            .modal-content {
+                background-color: #fff;
+                margin:  auto;
+                padding: 20px;
+                width: 30%;
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            }
+
+            .close {
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <div class="container container-class mt-5">
+        <div class="row">
+            <!-- Existing Addresses -->
+            <% if(typeof addresses!=='undefined' ){ %>
+                <% addresses.forEach((address, index)=> { %>
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <%= address.fullName %>
+                                </h5>
+                                <p class="card-text">
+                                    <%= address.houseName %>,<br>
+                                        <%= address.street %>,<br>
+                                            <%= address.city %>
+                                                <br>
+                                                <%= address.state %>,<br>
+                                                    <%= address.postalCode %>
+                                </p>
+                            </div>
+                            <div class="card-footer">
+                                <a href="#" class=" btn edit-address-button" data-address-index="<%= index %>">Edit</a>
+
+                                <a href="#" class="btn btn-sm float-end delete-address-button"
+                                    data-address-index="<%= index %>">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="editAddress_<%= index %>" class="modal">
+                        <div class="modal-content">
+                            <span class="close" data-address-index="<%= index %>">&times;</span>
+                            <div class="form-group">
+                                <label for="fullName_<%= index %>">Full Name</label>
+                                <input type="text" class="form-control" id="fullName_<%= index %>"
+                                    value="<%= address.fullName %>">
+                            </div>
+                            <div class="form-group">
+                                <label for="houseName_<%= index %>">House Name</label>
+                                <input type="text" class="form-control" id="houseName_<%= index %>"
+                                    value="<%= address.houseName %>">
+                            </div>
+                            <div class="form-group">
+                                <label for="street_<%= index %>">Street</label>
+                                <input type="text" class="form-control" id="street_<%= index %>"
+                                    value="<%= address.street %>">
+                            </div>
+                            <div class="form-group">
+                                <label for="city_<%= index %>">City</label>
+                                <input type="text" class="form-control" id="city_<%= index %>"
+                                    value="<%= address.city %>">
+                            </div>
+                            <div class="form-group">
+                                <label for="state_<%= index %>">State</label>
+                                <input type="text" class="form-control" id="state_<%= index %>"
+                                    value="<%= address.state %>">
+                            </div>
+                            <div class="form-group">
+                                <label for="pincode_<%= index %>">Pincode</label>
+                                <input type="text" class="form-control" id="pincode_<%= index %>"
+                                    value="<%= address.postalCode %>">
+                            </div>
+
+                            <br>
+                            <button class="btn save-address-button" data-address-index="<%= index %>">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                    <% }); %>
+                        <% }; %>
+
+
+
+                            <!-- Add New Address Card -->
+                            <div class="col-md-4 mb-4">
+
+                                <button class="btn btn-block add-new-address" id="addNewAddress">Add New
+                                    Address</button>
+
+                            </div>
+                            <div id="addAddressModal" class="modal">
+                                <div class="modal-content">
+                                    <span class="close" id="closeModal">&times;</span>
+                                    <h2>Add New Address</h2>
+                                    <form id="newAddressForm">
+                                        <div class="form-group">
+                                            <label for="fullName">Full Name</label>
+                                            <input type="text" class="form-control" id="fullName" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="houseName">House Name</label>
+                                            <input type="text" class="form-control" id="houseName" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="street">Street</label>
+                                            <input type="text" class="form-control" id="street" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="city">City</label>
+                                            <input type="text" class="form-control" id="city" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="state">State</label>
+                                            <input type="text" class="form-control" id="state" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="postalCode">Postal Code</label>
+                                            <input type="text" class="form-control" id="postalCode" required>
+                                        </div>
+                                        <br>
+                                        <button type="submit" class="btn" id="saveNewAddress">Save</button>
+                                    </form>
+                                </div>
+                            </div>
+        </div>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+        function showCancelModal(addressIndex) {
+            const modal = document.getElementById(`editAddress_${addressIndex}`);
+
+            modal.style.display = 'block';
+
+        }
+
+
+        function closeCancelModal(addressIndex) {
+            const modal = document.getElementById(`editAddress_${addressIndex}`);
+            modal.style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const editAddressButtons = document.querySelectorAll('.edit-address-button');
+
+            editAddressButtons.forEach(function (button) {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault(); // Prevent the default link behavior
+                    const addressIndex = button.getAttribute('data-address-index');
+                    showCancelModal(addressIndex);
+                });
+            });
+
+            const closeButtons = document.querySelectorAll('.close');
+
+            closeButtons.forEach(function (closeButton) {
+                closeButton.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const addressIndex = closeButton.getAttribute('data-address-index');
+                    closeCancelModal(addressIndex);
+                });
+            });
+            const modalButtons = document.querySelectorAll('.save-address-button');
+            modalButtons.forEach((button) => {
+                button.addEventListener('click', function () {
+                    const addressIndex = button.getAttribute('data-address-index');
+                    const fullName = document.getElementById(`fullName_${addressIndex}`).value;
+                    const houseName = document.getElementById(`houseName_${addressIndex}`).value;
+                    const street = document.getElementById(`street_${addressIndex}`).value;
+                    const city = document.getElementById(`city_${addressIndex}`).value;
+                    const state = document.getElementById(`state_${addressIndex}`).value;
+                    const postalCode = document.getElementById(`pincode_${addressIndex}`).value;
+
+                    const address = {
+                        addressIndex: addressIndex,
+                        fullName: fullName,
+                        houseName: houseName,
+                        street: street,
+                        city: city,
+                        state: state,
+                        postalCode: postalCode
+                    };
+                    fetch('/editAddress', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(address)
+                    })
+                        .then(response => response.json())
+                        .then((data) => {
+                            const modal = document.getElementById(`editAddress_${addressIndex}`);
+                            modal.style.display = 'none';
+                            if (data.isUpdated) {
+                                Swal.fire({
+                                    title: 'Address Updated!',
+                                    text: 'Your Address has been updated successfully.',
+                                    icon: 'success',
+                                }).then(() => {
+                                    window.location.href = '/loadAddress'; // Reload the page after the user acknowledges the alert
+                                });
+                            } else {
+                                Swal.fire('Error', 'Failed to update', 'error');
+                            }
+
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            // Handle network errors
+                        });
+
+                });
+            });
+            const modalDeleteButtons = document.querySelectorAll('.delete-address-button');
+
+            modalDeleteButtons.forEach((button) => {
+                button.addEventListener('click', function () {
+                    const addressIndex = button.getAttribute('data-address-index');
+                    const data = {
+                        addressIndex: addressIndex
+                    }
+                    fetch('/deleteAddress', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                        .then(response => response.json())
+                        .then((data) => {
+
+                            if (data.isUpdated) {
+                                Swal.fire({
+                                    title: 'Address Removed!',
+                                    text: 'Your Address has been updated successfully.',
+                                    icon: 'success',
+                                }).then(() => {
+                                    window.location.href = '/loadAddress'; // Reload the page after the user acknowledges the alert
+                                });
+                            } else {
+                                Swal.fire('Error', data.message, 'error');
+                            }
+
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            // Handle network errors
+                        });
+                });
+            });
+            const addNewAddressButton = document.getElementById('addNewAddress');
+            const addAddressModal = document.getElementById('addAddressModal');
+            const closeModalButton = document.getElementById('closeModal');
+            const newAddressForm = document.getElementById('newAddressForm');
+
+            addNewAddressButton.addEventListener('click', function () {
+                addAddressModal.style.display = 'block';
+            });
+
+            closeModalButton.addEventListener('click', function () {
+                addAddressModal.style.display = 'none';
+            });
+
+            newAddressForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // Retrieve values from the form
+                const fullName = document.getElementById('fullName').value;
+                const houseName = document.getElementById('houseName').value;
+                const street = document.getElementById('street').value;
+                const city = document.getElementById('city').value;
+                const state = document.getElementById('state').value;
+                const postalCode = document.getElementById('postalCode').value;
+
+              const address = {
+                fullName : fullName,
+                houseName : houseName,
+                street : street,
+                city :city,
+                state :state,
+                postalCode : postalCode
+              }
+                // Close the modal
+                fetch('/addNewUserAddress', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(address)
+                    })
+                        .then(response => response.json())
+                        .then((data) => {
+
+                            if (data.isUpdated) {
+                                Swal.fire({
+                                    title: 'Address saved!',
+                                    text: 'Your Address has been added successfully.',
+                                    icon: 'success',
+                                }).then(() => {
+                                    window.location.href = '/loadAddress'; // Reload the page after the user acknowledges the alert
+                                });
+                            } else {
+                                Swal.fire('Error', 'Failed to add address', 'error');
+                            }
+
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            // Handle network errors
+                        });
+            });
+
+        });
+
+    </script>
+    <%- include('../partials/footer') %>

@@ -1,0 +1,257 @@
+<%- include('../partials/userHeader') %>
+
+    <head>
+        <style>
+            .custom-container {
+                min-height: 700px;
+            }
+
+            .btn {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .btn:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+
+            .magnifier {
+                width: 150px;
+                /* Set the width of the magnifier */
+                height: 150px;
+                /* Set the height of the magnifier */
+                position: absolute;
+                border: 1px solid #ccc;
+                background: #f4f4f4;
+                pointer-events: none;
+                /* Prevent the magnifier from blocking mouse events */
+            }
+
+            /* Style the product image container */
+            .rounded-4 {
+                position: relative;
+            }
+        </style>
+    </head>
+    <section class="py-5">
+        <div class="container custom-container">
+            <div class="row gx-5">
+                <aside class="col-lg-6">
+                    <div class="rounded-4 mb-3 d-flex justify-content-center img-magnifier-container" id="first">
+                        <a data-fslightbox="mygalley" class="rounded-4" data-type="image" href="#">
+                            <img id="largeImage" style="width: 300px; height: 300px; margin: auto;"
+                                class="rounded-4 fit" src="<%= product.images[0] %>" />
+                            <span id="lens"></span>
+                        </a>
+                    </div>
+                    <div id="second" class="magnifier"></div>
+                    <div class="d-flex justify-content-center mb-3">
+                        <% product.images.forEach((image, index)=> { %>
+                            <a data-fslightbox="mygalley" class="border mx-1 rounded-2 thumbnail"
+                                data-index="<%= index %>" data-type="image" href="#" class="item-thumb">
+                                <img width="80px" height="80px" class="rounded-2" src="<%= image %>"
+                                    alt="<%= product.name %>">
+                            </a>
+                            <% }); %>
+                    </div>
+                </aside>
+
+                <main class="col-lg-6">
+                    <form action="/addToCart" method="post" id="form">
+                        <div class="ps-lg-3">
+                            <h4 class="title text-dark">
+                                <%= product.name %>
+                            </h4>
+                            <div class="d-flex flex-row my-3">
+                                <div class="text-warning mb-1 me-2">
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                    <span class="ms-1">
+                                        4.5
+                                    </span>
+                                </div>
+                                <span class="text-muted"><i class="fas fa-shopping-basket fa-sm mx-1"></i>154
+                                    orders</span>
+                                <% if(product.stock_count>0){ %>
+                                    <span class="text-success ms-2">In stock</span>
+                                    <%}else{ %>
+                                        <span class="text-success ms-2">Out of stock</span>
+                                        <%} %>
+                            </div>
+                            <% if(typeof message!=='undefined' ){ %>
+                                <p style="color: green;">
+                                    <%= message %>
+                                </p>
+                                <% } %>
+
+                                    <div class="mb-3">
+                                        <span class="h5"><i class="fa fa-indian-rupee-sign"></i>
+                                            <% if (typeof discountedPrice !=='undefined' ) { %>
+                                                <s>
+                                                    <%= originalPrice %>
+                                                </s>
+                                                <%= discountedPrice %> <span class="text-muted">(Discount: <%=
+                                                            product.offer.discountPercentage %>%)</span>
+
+                                                    <% } else { %>
+                                                        <%= product.price %>
+                                                            <% } %>
+                                        </span>
+                                        <span class="text-muted">/per plant</span>
+                                    </div>
+
+                                    <p>
+                                        <%= product.description %>
+                                    </p>
+
+
+
+                                    <hr />
+
+                                    <div class="row mb-4">
+
+                                        <!-- col.// -->
+                                        <div class="col-md-4 col-6 mb-3">
+
+                                            <div class="d-flex flex-column align-items-center justify-content-center">
+
+                                                <label class="mb-2 d-block">Quantity</label>
+                                                <div class="input-group mb-3" style="width: 170px;">
+                                                    <button class="btn btn-white border border-secondary px-3"
+                                                        type="button" id="decrement">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <input type="number"
+                                                        class="form-control text-center border border-secondary"
+                                                        id="quantity" placeholder="1" aria-label="Quantity"
+                                                        name="quantity" value="1" />
+
+                                                    <button class="btn btn-white border border-secondary px-3"
+                                                        type="button" id="increment">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+
+                                                </div>
+
+                                            </div>
+                                            <input type="hidden" name="productId" value="<%= product._id%>">
+                                        </div>
+                                    </div>
+
+                                    <% if (product.stock_count> 0) { %>
+                                        <button type="submit" class="btn shadow-0"> <!-- Add your button styles here -->
+                                            <i class="me-1 fa fa-shopping-basket"></i> Add to cart
+                                        </button>
+                                        <% } else { %>
+                                            <button type="submit" class="btn shadow-0" disabled>
+                                                <i class="me-1 fa fa-shopping-basket"></i> Add to cart
+                                            </button>
+                                            <% } %>
+                                                <a href="#" class="btn py-2 icon-hover px-3"
+                                                    onclick="saveToWishlist('<%= product._id %>')"> <i
+                                                        class="me-1 fa fa-heart fa-lg"></i> Save </a>
+                        </div>
+                    </form>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const largeImage = document.getElementById('largeImage');
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        const product = <%- JSON.stringify(product) %>;
+
+        thumbnails.forEach((thumbnail) => {
+            thumbnail.addEventListener('click', (event) => {
+
+                event.preventDefault();
+
+                const index = thumbnail.getAttribute('data-index');
+                largeImage.src = product.images[index];
+
+            });
+        });
+        // Get references to the HTML elements
+        const decrementButton = document.getElementById('decrement');
+        const incrementButton = document.getElementById('increment');
+        const quantityInput = document.getElementById('quantity');
+
+        // Initialize the quantity value
+        let quantity = 1;
+
+        // Update the quantity input and variable when decrement button is clicked
+        decrementButton.addEventListener('click', () => {
+            if (quantity > 1) {
+                quantity--;
+                quantityInput.value = quantity;
+            }
+        });
+
+        // Update the quantity input and variable when increment button is clicked
+        incrementButton.addEventListener('click', () => {
+            quantity++;
+            quantityInput.value = quantity;
+        });
+        // const largeImage = document.getElementById("largeImage");
+        const lens = document.getElementById("second");
+        const ratio = 2; // Adjust this value to control the level of zoom.
+
+        largeImage.addEventListener("mousemove", function (e) {
+            const bounds = this.getBoundingClientRect();
+            const x = e.clientX - bounds.left;
+            const y = e.clientY - bounds.top;
+
+            const xPercent = (x / bounds.width) * 50;
+            const yPercent = (y / bounds.height) * 50;
+
+            lens.style.width = largeImage.width * ratio + "px";
+            lens.style.height = largeImage.height * ratio + "px";
+
+            lens.style.backgroundImage = "url('" + largeImage.src + "')";
+
+            lens.style.backgroundSize = (largeImage.width * ratio) + "px " + (largeImage.height * ratio) + "px";
+            lens.style.backgroundPosition = "-" + xPercent * ratio + "% -" + yPercent * ratio + "%";
+
+            lens.style.left = x - (lens.offsetWidth / 2) + "px";
+            lens.style.top = y - (lens.offsetHeight / 2) + "px";
+
+            lens.style.display = "block";
+        });
+
+        largeImage.addEventListener("mouseleave", function () {
+            lens.style.display = "none";
+        });
+        
+        function saveToWishlist(productId) {
+            alert(productId)
+
+            const data = { productId };
+
+            fetch('/saveToWishlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+                .then((response) => {
+                    if (response.ok) {
+                       
+                    } else {
+                        // Handle any errors or authentication issues.
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+
+
+
+    <%- include('../partials/footer') %>

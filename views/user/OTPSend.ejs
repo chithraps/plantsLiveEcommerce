@@ -1,0 +1,92 @@
+<%- include('../partials/header') %>
+
+    <head>
+        <style>
+            body {
+                background-color: rgb(228, 217, 217);
+            }
+
+            .button-class {
+                background-color: rgb(66, 182, 105);
+            }
+
+            .button-class:hover {
+                background-color: rgb(36, 61, 40);
+            }
+
+            a.text-body {
+                color: rgb(66, 182, 105) !important;
+            }
+
+            .h4-color {
+                color: rgb(66, 182, 105);
+            }
+        </style>
+    </head>
+    <section class="vh-100 login-section">
+        <div class="container-fluid h-custom">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+
+                <div class="col-lg-6 offset-xl-1">
+                    <form action="/otpverification" method="post" id="sendOtp">
+
+                        <h4 class="mb-4 text-center h4-color">Verify Email</h4>
+                        <br>
+                        <!-- Email input -->
+                        <div class="row d-flex">
+                            <div class="col-lg-6">
+                                <div class="form-floating mb-3">
+                                    <input type="email" id="email" class="form-control form-control-lg"
+                                        placeholder="email" name="email" />
+                                    <label class="form-label" for="floatingInput" name="email">Email </label>
+                                    <div class="error" id="emailError" style="color: red;"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <button type="button" class="btn btn-lg button-class"
+                                    style="padding-left: 2.5rem; padding-right: 2.5rem; color:white" onclick="validateForm()">send</button>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <!-- Checkbox -->
+                            <a href="/otpverification" class="text-body">resend OTP</a>
+                            
+                        </div>
+
+                    </form>
+                    
+                    
+                    <% if(typeof message!=='undefined' ){ %>
+                        <p style="color: green;">
+                            <%= message %>
+                        </p>
+                        <% } %>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        function validateForm() {
+            
+          const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+           
+          const email = document.getElementById("email").value;
+          clearErrorMessages();
+          if (!emailRegex.test(email)) {
+            showError("emailError", "Invalid email format");
+            return;
+          }
+          document.getElementById("sendOtp").submit();
+        }
+        function showError(id, message) {
+          const errorDiv = document.getElementById(id);
+          errorDiv.innerText = message;
+        }
+        function clearErrorMessages() {
+          const errorDivs = document.querySelectorAll(".error");
+          errorDivs.forEach(errorDiv => errorDiv.innerText = "");
+        }
+        
+      </script>
+
+    <%- include('../partials/footer') %>

@@ -1,0 +1,129 @@
+<%- include('../partials/adminHeader') %>
+
+    <head>
+        <style>
+            .h3-color {
+                color: rgb(66, 182, 105);
+            }
+
+            .button-class {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .button-class:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+        </style>
+    </head>
+    <section class="container mt-5 mb-5 col">
+        <div class="row content d-flex justify-content-center align-items-center">
+            <div class="col-md-5">
+                <div class="box shadow bg-white p-4">
+                    <h3 class="mb-4 text-center fs-1 h3-color">Edit User</h3>
+
+                    <form action="" method="post" class="mb-3" id="editUser">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control rounded-0" id="name" placeholder="Name"
+                                name="name" value="<%= user.name%>" required>
+                            <label for="floatingInput" name="uname">Name</label>
+                            <div class="error" id="nameError" style="color: red;"></div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control rounded-0" id="email" placeholder="Email"
+                                name="email" value="<%= user.email%>" required>
+                            <label for="floatingInput" name="email">Email</label>
+                            <div class="error" id="emailError" style="color: red;"></div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control rounded-0" id="mobile" placeholder="Mobile"
+                                name="mobile" value="<%= user.mobile%>" required>
+                            <label for="floatingInput" name="mobile">Mobile</label>
+                            <div class="error" id="mobileError" style="color: red;"></div>
+                        </div>
+                        <input type="hidden" name="id" value="<%= user._id%>">
+
+                        <div class="d-grid gap-2 mb-3">
+                            <button type="submit"
+                                class="btn  btn-lg border-0 rounded-0 button-class">Submit</button>
+                        </div>
+
+                    </form>
+                    
+                    <% if(typeof message!=='undefined' ){ %>
+                        <p style="color: green;">
+                            <%= message %>
+                        </p>
+                        <% } %>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+    <script>
+
+        
+        const form = document.getElementById("editUser")
+        
+         
+        form.addEventListener('submit',e=>{
+            e.preventDefault();
+            
+            //name validation
+
+            clearErrors();
+    
+    // Get input values
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const mobile = document.getElementById("mobile").value;
+    
+    
+    // Validate name (non-empty)
+    if (name === "") {
+        displayError("nameError", "Name cannot be empty");
+        return;
+    }
+    
+    // Validate email using a simple regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        displayError("emailError", "Invalid email format");
+        return;
+    }
+    
+    // Validate mobile number (assuming a basic format)
+    const mobileRegex = /^\d{10}$/;
+    if (!mobileRegex.test(mobile)) {
+        displayError("mobileError", "Invalid mobile number");
+        return;
+    }
+    
+    
+    
+    // If all validations pass, you can proceed with form submission
+    
+    // Uncomment the line below to submit the form programmatically
+    form.submit();
+});
+
+function displayError(fieldId, errorMessage) {
+    const errorSpan = document.getElementById(fieldId);
+    errorSpan.textContent = errorMessage;
+}
+
+function clearErrors() {
+    const errorSpans = document.querySelectorAll(".error");
+    errorSpans.forEach(function(span) {
+        span.textContent = "";
+    });
+}
+
+        
+
+        
+
+    </script>
+    <%- include('../partials/adminFooter') %>

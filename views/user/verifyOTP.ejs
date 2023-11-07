@@ -1,0 +1,71 @@
+<%- include('../partials/header') %>
+
+    <head>
+        <style>
+            body {
+                background-color: rgb(228, 217, 217);
+            }
+
+            .button-class {
+                background-color: rgb(66, 182, 105);
+            }
+
+            .button-class:hover {
+                background-color: rgb(36, 61, 40);
+            }
+
+            .h4-color {
+                color: rgb(66, 182, 105);
+            }
+        </style>
+    </head>
+    <section class="vh-100 login-section">
+        <div class="container-fluid h-custom">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+
+                <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+                    <form action="/verifyOtp" method="post" id="verifyOtp">
+
+                        <h3 class="mb-4 text-center fs-1 h3-color">Verify OTP</h3>
+                        <br>
+                        <p>OTP will expire in: <span id="otpTimer"></span> 1 minute</p>
+                        <!-- Email input -->
+                        <div class="form-floating mb-3">
+                            <input type="hidden" name="email" value="<%= email %>">
+
+                        </div>
+
+                        <!-- Password input -->
+                        <div class="form-floating mb-3">
+                            <input type="text" id="otp" class="form-control form-control-lg" placeholder="OTP"
+                                name="otp" />
+                            <label class="form-label" for="form-floating" name="otp">OTP</label>
+                        </div>
+                        <input type="hidden" name="otpExpiration" id="otpExpiration" value="<%= otpExpiration %>">
+                        <div class="text-center text-lg-start mt-4 pt-2">
+                            <button type="submit" class="btn btn-lg button-class"
+                                style="padding-left: 2.5rem; padding-right: 2.5rem; color:white">submit</button>
+                        </div>
+
+                    </form>
+                    <br>
+                    <form action="/resendOtp" method="POST">
+                        <input type="hidden" name="email" value="<%= email %>">
+                        <button class="button-class" type="submit">Resend OTP</button>
+                    </form>
+                   
+                    <br>
+
+                    <% if(typeof message!=='undefined' ){ %>
+                        <p style="color: green;">
+                            <%= message %>
+                        </p>
+                        <% } %>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        
+    </script>
+    <%- include('../partials/footer') %>

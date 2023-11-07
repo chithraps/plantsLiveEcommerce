@@ -1,0 +1,106 @@
+<%- include('../partials/userHeader') %>
+
+    <head>
+        <style>
+            .btn {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .btn:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+        </style>
+    </head>
+
+    <body>
+        <section class="h-100 h-custom" style="background-color: #eee;">
+            <div class="container py-5 h-100">
+                <div class="row d-flex justify-content-center align-items-center h-100">
+                    <div class="col-lg-8 col-xl-6">
+                        <div class="card border-top border-bottom border-3" style="border-color: #f37a27 !important;">
+                            <div class="card-body p-5">
+
+                                <p class="lead fw-bold mb-5" style="color: rgb(66, 182, 105);">Order Details</p>
+
+                                <div class="row">
+                                    <div class="col mb-3">
+                                        <p class="small text-muted mb-1">Date</p>
+                                        <p>
+                                            <%= order.createdAt.toDateString() %>
+                                        </p>
+                                    </div>
+                                    <div class="col mb-3">
+                                        <p class="small text-muted mb-1">Order ID</p>
+                                        <p>
+                                            <%= order._id %>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="mx-n5 px-5 py-4" style="background-color: #f2f2f2;">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Image</th>
+                                                <th>Product Name</th>
+                                                <th>Quantity</th>
+                                                <th>Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% order.items.forEach((item)=> { %>
+                                                <tr>
+                                                    <td>
+                                                        <img src="<%= item.productId.images[0] %>"
+                                                            class="img-fluid rounded-start"
+                                                            alt="<%= item.productId.name %>">
+                                                    </td>
+                                                    <td>
+                                                        <%= item.productId.name %>
+                                                    </td>
+
+                                                    <td>
+                                                        <%= item.quantity %>
+                                                    </td>
+                                                    <td>
+                                                        <%= item.price %>
+                                                    </td>
+                                                </tr>
+                                                <% }); %>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="row ">
+                                    <div class="col-md-6 col-lg-6 ">
+                                        <p class="lead fw-bold mb-0" style="color: rgb(66, 182, 105);">Total Amount :
+
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6 col-lg-6 ">
+                                        <p class="lead fw-bold mb-0" style="color: rgb(66, 182, 105);">
+                                            <%= order.totalAmount %>
+                                        </p>
+                                    </div>
+                                </div>
+                             
+                                <div class="row d-flex justify-content-center align-items-center">
+                                   
+                                    <div class="col-md-6 col-lg-6 ">
+                                        <a href="/viewOrders" class="btn ">Track Order</a>
+
+                                    </div>
+                                    <div class="col-md-6 col-lg-6 ">
+                                        <br>
+                                        <a href="/home" class="btn ">Continue Shopping</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <%- include('../partials/footer') %>

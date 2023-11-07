@@ -1,0 +1,32 @@
+/* Custom styles for the login form */
+.login-card {
+  max-width: 500px;
+  margin: 0 auto;
+  margin-top: 200px;
+  display: flex;
+  flex-direction: column;
+  
+  /* Center horizontally */
+
+  /* Center vertically */
+}
+
+body {
+  background-color: #f3e3e8;
+}
+
+.button-class {
+  background-color: rgb(66, 182, 105);
+  color: #ffffff;
+}
+
+.button-class:hover {
+  background-color: rgb(19, 102, 47);
+  color: #ffffff;
+}
+
+.login-head {
+  align-items: center;
+  justify-content: center;
+  color: rgb(66, 182, 105);
+}

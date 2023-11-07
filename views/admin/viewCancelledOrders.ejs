@@ -1,0 +1,230 @@
+<%- include('../partials/adminHeader') %>
+
+    <head>
+        <style>
+            a {
+                text-decoration: none;
+            }
+
+            .page-number {
+                margin: 0 10px;
+                /* Adjust the margin as needed */
+            }
+
+            /* Styles for the modal */
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.7);
+            }
+
+            .modal-content {
+                background-color: #fff;
+                margin: 10% auto;
+                padding: 20px;
+                width: 30%;
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            }
+
+            .close {
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+
+            .btn {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .btn:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+        </style>
+    </head>
+    <div class="container mt-4 col">
+        <h4>Pending Orders</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+
+                    <th scope="col">User Id</th>
+                    <th scope="col">Created Date</th>
+                    <th scope="col">Payment Method</th>
+                    <th scope="col">Total Amount</th>
+                    <th scope="col">Cancelled Reason</th>
+                    <th scope="col">Status</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                <% refund.forEach((order)=> { %>
+                    <tr>
+
+                        <td>
+                            <%= order.userId %>
+                        </td>
+                        <td>
+                            <%= order.createdAt.toDateString() %>
+                        </td>
+                        <td>
+                            <%= order.payment %>
+                        </td>
+                        <td>
+                            <%= order.amount %>
+                        </td>
+                        <td>
+                            <%= order.reason %>
+                        </td>
+                        <td>
+                            <%= order.status %>
+                        </td>
+                        <td>
+                            <% if (order.status !=='Approved' && order.payment !=='Cash on Delivery' ) { %>
+                                <button class="btn update-status-button"
+                                    data-order-id="<%= order._id %>">Approve</button>
+                                <% } %>
+                        </td>
+                    </tr>
+                    <!-- Modal for status update -->
+                    <div id="statusUpdateModal_<%= order._id %>" class="modal">
+                        <div class="modal-content">
+                            <span class="close" data-order-id="<%= order._id %>">&times;</span>
+                            <h4>Approve</h4>
+
+                            <label for="orderStatus">Select Status:</label>
+                            <select id="orderStatus" name="orderStatus">
+                                <option value="Approved">Approved</option>
+                                <option value="Declined">Declined</option>
+
+                            </select>
+                            <input type="hidden" name="orderId" value="<%= order.orderId %>">
+                            <input type="hidden" name="amount" value="<%= order.amount %>">
+                            <input type="hidden" name="payment" value="<%= order.payment %>">
+                            <input type="hidden" name="userId" value="<%= order.userId %>">
+                            <input type="hidden" name="id" value="<%= order._id %>">
+                            <br>
+                            <button class="btn" data-order-id="<%= order._id %>" id="updateButton">Update</button>
+
+                        </div>
+                    </div>
+                    <% }); %>
+            </tbody>
+        </table>
+
+        <br>
+        <br>
+        <% for (let j=1; j <=totalPages; j++) { %>
+            <a href="?page=<%= j %>">
+                <span class="page-number">
+                    <%= j %>
+                </span>
+            </a>
+            <% } %>
+                <br>
+                <br>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+        // Function to show the modal
+        function showModal(orderId) {
+            const modal = document.getElementById(`statusUpdateModal_${orderId}`);
+            modal.style.display = 'block';
+        }
+
+        // Function to close the modal
+        function closeModal(orderId) {
+            const modal = document.getElementById(`statusUpdateModal_${orderId}`);
+            modal.style.display = 'none';
+        }
+
+        // Attach event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            const updateStatusButtons = document.querySelectorAll('.update-status-button');
+            const closeButtons = document.querySelectorAll('.close');
+
+            updateStatusButtons.forEach(function (button) {
+                button.addEventListener('click', function (e) {
+                    e.stopPropagation(); // Prevent parent click event
+                    const orderId = button.getAttribute('data-order-id');
+                    showModal(orderId);
+                });
+            });
+
+            closeButtons.forEach(function (closeButton) {
+                closeButton.addEventListener('click', function (e) {
+                    e.stopPropagation(); // Prevent parent click event
+                    const orderId = closeButton.getAttribute('data-order-id');
+                    closeModal(orderId);
+                });
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            const updateButton = document.getElementById('updateButton');
+            const statusUpdateForm = document.getElementById('statusUpdateForm');
+
+            updateButton.addEventListener('click', function (e) {
+                e.preventDefault(); // Prevent the default button behavior
+                const dataOrderId = updateButton.getAttribute('data-order-id');
+                const orderId = document.querySelector('input[name="orderId"]').value;
+                const orderStatus = document.querySelector('select[name="orderStatus"]').value;
+                const amount = document.querySelector('input[name="amount"]').value;
+                const payment = document.querySelector('input[name="payment"]').value;
+                const userId = document.querySelector('input[name="userId"]').value;
+                const id = document.querySelector('input[name="id"]').value;
+
+                const formData = {
+                    orderId,
+                    orderStatus,
+                    amount,
+                    payment,
+                    userId,
+                    id,
+                };
+
+                // Create and send an AJAX request using the Fetch API
+                fetch('/admin/approveCancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                })
+                    .then((response) => {
+
+                        if (response.ok) {
+
+                            const modal = document.getElementById(`statusUpdateModal_${dataOrderId}`);
+                            modal.style.display = 'none';
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'The order status has been updated successfully.',
+                                icon: 'success',
+                            }).then(() => {
+                                window.location.href = '/admin/viewCancelledOrder'; // Reload the page after the user acknowledges the alert
+                            });
+                        } else {
+                            Swal.fire('Error', "something went wrong", 'error');
+                        }
+                    })
+                    .then((result) => {
+                        // Proceed to the page after the SweetAlert is closed
+                        if (result.isConfirmed) {
+                            window.location.href = '/admin/viewCancelledOrder';
+                        }
+                    })
+                    .catch((error) => {
+                        // Handle network errors
+                    });
+            });
+        });
+    </script>
+
+    <%- include('../partials/adminFooter') %>

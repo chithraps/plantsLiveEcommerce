@@ -1,0 +1,152 @@
+<%- include('../partials/header') %>
+
+  <head>
+
+    <link rel="stylesheet" href="/static/userLogin.css">
+  </head>
+  <section class="vh-100 login-section">
+    <div class="container-fluid h-custom">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+
+        <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+          <form action="" method="post" id="userLogin">
+
+            <h3 class="mb-4 text-center fs-1 h3-color">Login</h3>
+            <!-- Email input -->
+            <div class="form-floating mb-3">
+              <input type="email" id="email" class="form-control form-control-lg" placeholder="email" name="email" />
+              <label class="form-label" for="floatingInput" name="email">Email </label>
+              <div class="error" id="emailError" style="color: red;"></div>
+            </div>
+
+            <!-- Password input -->
+            <div class="form-floating mb-3">
+              <input type="password" id="password" class="form-control form-control-lg" placeholder="password"
+                name="password" />
+              <label class="form-label" for="form-floating" name="password">Password</label>
+              <div class="error" id="passwordError" style="color: red;"></div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <!-- Checkbox -->
+
+              <a class="btn a-link" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
+                Forgot Password
+              </a>
+            </div>
+
+            <div class="text-center text-lg-start mt-4 pt-2">
+              <button type="submit" class="btn btn-lg button-class"
+                style="padding-left: 2.5rem; padding-right: 2.5rem; color:white">Login</button>
+              <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <a href="/register"
+                  class="a-link">Register</a></p>
+            </div>
+
+          </form>
+          <% if(typeof message!=='undefined' ){ %>
+            <p style="color: green;">
+              <%= message %>
+            </p>
+            <% } %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Forgot Password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form method="POST" action="/reset-password" id="resetPassword">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email:</label>
+              <input type="email" id="rEmail" name="rEmail" class="form-control" placeholder="Enter your email" >
+            </div>
+            <div class="error" id="rEmailError" style="color: red;"></div>
+            <div class="text-center">
+              <button type="submit" class="btn button-class">Reset Password</button>
+            </div>
+          </form>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("userLogin")
+    const resetForm = document.getElementById("resetPassword")
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      //name validation
+
+      clearErrors();
+
+      // Get input values
+
+      const email = document.getElementById("email").value;
+
+      const password = document.getElementById("password").value;
+
+      // Validate name (non-empty)
+
+
+      // Validate email using a simple regex
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email) || email == '') {
+        displayError("emailError", "Invalid email format");
+        return;
+      }
+
+      // Validate mobile number (assuming a basic format)
+
+
+      // Validate password (at least 6 characters)
+      if (password == '') {
+        displayError("passwordError", "Password should not be empty");
+        return;
+      }
+
+      // If all validations pass, you can proceed with form submission
+
+      // Uncomment the line below to submit the form programmatically
+      form.submit();
+    });
+
+    function displayError(fieldId, errorMessage) {
+      const errorSpan = document.getElementById(fieldId);
+      errorSpan.textContent = errorMessage;
+    }
+
+    function clearErrors() {
+      const errorSpans = document.querySelectorAll(".error");
+      errorSpans.forEach(function (span) {
+        span.textContent = "";
+      });
+    }
+    resetForm.addEventListener('submit', e => {
+      e.preventDefault();
+      
+      clearErrors();
+
+      // Get input values
+
+      const email = document.getElementById("rEmail").value; 
+      // Validate email using a simple regex
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email) || email == '') {
+        displayError("rEmailError", "Invalid email format");
+        return;
+      }
+
+      
+      resetForm.submit();
+    });
+  </script>
+  <%- include('../partials/footer') %>

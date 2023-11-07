@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+
+.footer-class {
+    position: fixed;
+}
+
+.container-custom {
+    height: 950px;
+    /* Set the height to your desired value */
+}
+
+.banner {
+    position: relative;
+}
+.btn{
+    background-color: rgb(66, 182, 105);
+    color: #ffffff;
+}
+.btn:hover{
+    background-color: rgb(19, 102, 47);
+        color: #ffffff;
+}
+/* CSS to style the text overlay */
+.text-overlay {
+    font-family: 'Poppins', sans-serif;
+    ;
+    position: absolute;
+    top: 40%;
+    left: 15%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: rgb(7, 7, 7);
+    /* Text color */
+
+    /* Background color with transparency */
+    padding: 20px;
+}
+
+/* Style for text within the overlay */
+.text-overlay h1 {
+    font-size: 36px;
+}
+
+.text-overlay p {
+    font-size: 18px;
+}
+
+.product-image {
+    width: 210px;
+    height: 150px;
+
+
+}
+
+.card {
+    border: none;
+}
+
+.product-image:hover {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+
+.container {
+    overflow-x: hidden !important;
+    /* Hide horizontal overflow */
+    overflow-y: hidden;
+    /* Add a vertical scrollbar if necessary */
+}
+
+.search-input {
+    width: 300px;
+    /* Adjust the width as needed */
+    margin-right: 5px;
+}
+
+a {
+    text-decoration: none;
+}

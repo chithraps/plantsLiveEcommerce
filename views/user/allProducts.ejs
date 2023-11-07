@@ -1,0 +1,262 @@
+<%- include('../partials/userHeader') %>
+
+    <head>
+        <style>
+            .btn {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .btn:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+
+            /* CSS to style the text overlay */
+            .text-overlay {
+                font-family: 'Poppins', sans-serif;
+                ;
+                position: absolute;
+                top: 40%;
+                left: 15%;
+                transform: translate(-50%, -50%);
+                text-align: center;
+                color: rgb(7, 7, 7);
+                /* Text color */
+
+                /* Background color with transparency */
+                padding: 20px;
+            }
+
+            /* Style for text within the overlay */
+            .text-overlay h1 {
+                font-size: 36px;
+            }
+
+            .text-overlay p {
+                font-size: 18px;
+            }
+
+            .product-image {
+                width: 210px;
+                height: 150px;
+
+            }
+
+            .card {
+                border: none;
+            }
+
+            .product-image:hover {
+                transform: scale(1.1);
+                transition: transform 0.3s ease;
+                cursor: pointer;
+            }
+
+            a {
+                text-decoration: none;
+            }
+
+            .page-number {
+                margin: 0 10px;
+                /* Adjust the margin as needed */
+            }
+
+            .container-fluid {
+                margin-top: 30px;
+            }
+
+            .sidebar {
+                margin-top: 110px;
+
+
+                /* Adjust the margin as needed */
+            }
+        </style>
+    </head>
+    <div class="container-fluid ">
+        <div class="row flex-nowrap">
+            <!-- Sidebar with Filters -->
+            <div class="col-md-3 col-xl-2 px-sm-2 px-0 bg-color sidebar fixed-top">
+                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 min-vh-100">
+                    <h4>Filters</h4>
+                    <!-- Category Filters (e.g., checkboxes) -->
+                    <br>
+                    <h5>Categories</h5>
+
+                    <form id="categoryFilterForm">
+                        <!-- Render category filter options dynamically from your data -->
+                        <% categories.forEach(category=> { %>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="<%= category.id %>"
+                                    value="<%= category.id %>">
+                                <label class="form-check-label" for="<%= category.id %>">
+                                    <%= category.name %>
+                                </label>
+                            </div>
+                            <% }); %>
+                    </form>
+                    <br>
+
+                    <!-- Price Range Filter (e.g., input fields) -->
+                    <h5>Price Range</h5>
+                    <form id="priceFilterForm">
+                        <div class="form-group">
+                            <label for="minPrice">Min Price</label>
+                            <input type="number" class="form-control" id="minPrice" placeholder="Min Price">
+                        </div>
+                        <div class="form-group">
+                            <label for="maxPrice">Max Price</label>
+                            <input type="number" class="form-control" id="maxPrice" placeholder="Max Price">
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Product Listing -->
+            <!-- Product Listing -->
+            <div class="col-md-9 col-xl-10 offset-md-3 offset-xl-2">
+                <h2>Products</h2>
+                <div class="row" id="productList">
+                    <!-- Render product cards dynamically from your data -->
+                    <% products.forEach(product=> { %>
+                        <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                            <div class="card shadow-2-strong custom-card d-flex flex-column align-items-center mb-4">
+                                <img src="<%= product.images[0] %>" class="card-img-top product-image"
+                                    alt="<%= product.name %>">
+                                <div class="card-body d-flex flex-column align-items-center">
+                                    <h5 class="card-title">
+                                        <%= product.name %>
+                                    </h5>
+                                    <p class="card-text"><i class="fa-solid fa-indian-rupee-sign"></i>
+                                        <%= product.price %>
+                                    </p>
+                                    <a href="/viewProduct?id=<%= product._id %>" class="btn">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+                </div>
+                <div id="productListContainer">
+                    <!-- Product cards will be displayed here -->
+                </div>
+
+                <div id="paginationContainer">
+                    <!-- Pagination links will be displayed here -->
+                </div>
+                <div id="productList"></div>
+                <div id="filteredProductList"></div>
+                <br>
+                <br>
+                <div id="actualPagination">
+                    <% for (let j=1; j <=totalPages; j++) { %>
+                        <a href="?page=<%= j %>">
+                            <span class="page-number">
+                                <%= j %>
+                            </span>
+                        </a>
+                        <% } %>
+                </div>
+                <br>
+                <br>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- JavaScript for Handling Filters -->
+    <script>
+        // Attach event listeners for category and price filters
+        const categoryCheckboxes = document.querySelectorAll('#categoryFilterForm input[type="checkbox"]');
+        categoryCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', handleCategoryFilter);
+        });
+        const checkboxStatus = Array.from(categoryCheckboxes).map(checkbox => checkbox.checked);
+
+        // Function to handle category filter change
+        async function handleCategoryFilter() {
+            // Get selected category IDs
+            const selectedCategoryIds = Array.from(categoryCheckboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value);
+
+            // Other filter parameters (e.g., search query, page, perPage) if needed
+            const search = ''; // Add your search query logic
+            const page = 1; // Reset to the first page when applying a filter
+            const perPage = 9;
+
+            // Send an AJAX request to filter products by category
+            try {
+                const response = await fetch(`/filterProductsByCategory?categoryIds=${selectedCategoryIds.join(',')}&search=${search}&page=${page}&perPage=${perPage}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    console.error('Error:', response.statusText);
+                    return;
+                }
+
+                // Handle the filtered products data received from the server
+                const result = await response.json();
+
+                // Update the product list and pagination divs
+                updateProductList(result.filteredProducts);
+                updatePaginationLinks(result.currentPage, result.totalPages);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Function to update the product list on the frontend
+        function updateProductList(products) {
+            const productListContainer = document.getElementById('productList');
+            const productList = document.getElementById('filteredProductList');
+
+            productList.style.display = 'none';
+
+            // Clear the existing products
+            productListContainer.innerHTML = '';
+
+            // Loop through the filtered products and append them to the product list
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'col-lg-4 col-md-6 col-sm-12 mb-4';
+                productCard.innerHTML = `
+      <div class="card shadow-2-strong custom-card d-flex flex-column align-items-center mb-4">
+        <img src="${product.images[0]}" class="card-img-top product-image" alt="${product.name}">
+        <div class="card-body d-flex flex-column align-items-center">
+          <h5 class="card-title">${product.name}</h5>
+          <p class="card-text"><i class="fa-solid fa-indian-rupee-sign"></i> ${product.price}</p>
+          <a href="/viewProduct?id=${product._id}" class="btn">View Details</a>
+        </div>
+      </div>
+    `;
+
+                productListContainer.appendChild(productCard);
+            });
+        }
+
+        // Function to update the pagination links on the frontend
+        function updatePaginationLinks(currentPage, totalPages) {
+            // Clear previous pagination links
+            const actualPagination = document.getElementById('actualPagination');
+            actualPagination.style.display = 'none';
+
+            const paginationContainer = document.getElementById('paginationContainer');
+            paginationContainer.innerHTML = '';
+
+            for (let j = 1; j <= totalPages; j++) {
+                const pageLink = document.createElement('a');
+                pageLink.href = `?page=${j}`;
+                pageLink.className = 'page-number';
+                pageLink.innerText = j;
+
+                paginationContainer.appendChild(pageLink);
+            }
+        }
+    </script>
+    <%- include('../partials/footer') %>

@@ -1,0 +1,165 @@
+<%- include('../partials/adminHeader') %>
+
+    <head>
+        <style>
+            .card-header {
+                background-color: rgb(66, 182, 105);
+            }
+
+            .h3-text {
+                color: white;
+            }
+
+            .btn-class {
+                background-color: rgb(66, 182, 105);
+                color: white;
+            }
+
+            .btn-class:hover {
+                background-color: rgb(25, 95, 48);
+                color: white;
+
+            }
+
+            .image-preview-item {
+                display: inline-block;
+                margin: 5px;
+            }
+
+            .image-thumbnail {
+                max-width: 100px;
+                /* Adjust the maximum width as needed */
+                max-height: 100px;
+                /* Adjust the maximum height as needed */
+            }
+        </style>
+    </head>
+    <div class="container mt-5 mb-5 col">
+        <div class="row justify-content-center ">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="text-center h3-text">Add Banner</h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/addBanner" method="POST" id="banner" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="title" class="form-label">Banner Title</label>
+                                <input type="text" class="form-control" id="title" name="title">
+                                <div class="error" id="titleError" style="color: red;"></div>
+                            </div>
+                            <div id="image-preview" class="image-preview"></div>
+                            <div class="form-group">
+                                <label for="image" class="form-label">Banner Image</label>
+                                <input type="file" class="form-control" id="image" name="image">
+                                <div class="error" id="imageError" style="color: red;"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="link" class="form-label">Link</label>
+                                <input type="text" class="form-control" id="link" name="link">
+                                <div class="error" id="linkError" style="color: red;"></div>
+                            </div>
+                            <div class="text-center mt-4 mb-4">
+                                <button type="submit" class="btn btn-class">Submit</button>
+                            </div>
+                        </form>
+                        <% if(typeof message!=='undefined' ){ %>
+                            <p style="color: green;">
+                                <%= message %>
+                            </p>
+                            <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const form = document.getElementById("banner")
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            clearErrors();
+
+            const title = document.getElementById("title").value;
+            const link = document.getElementById("link").value;
+            const image = document.getElementById("image").value;
+            // Validate name (non-empty)
+            if (title === "") {
+                displayError("titleError", "Title cannot be empty");
+                return;
+            }
+
+            if (!image) {
+                document.getElementById("imageError").textContent = "Image is required.";
+                return;
+            } else {
+                const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+                if (!allowedExtensions.exec(image)) {
+                    document.getElementById("imageError").textContent = "Invalid image format. Use jpg, jpeg, png";
+                    return;
+                }
+            }
+
+
+            form.submit();
+        });
+
+        function displayError(fieldId, errorMessage) {
+            const errorSpan = document.getElementById(fieldId);
+            errorSpan.textContent = errorMessage;
+        }
+
+        function clearErrors() {
+            const errorSpans = document.querySelectorAll(".error");
+            errorSpans.forEach(function (span) {
+                span.textContent = "";
+            });
+        }
+        const imageInput = document.getElementById('image');
+        const imagePreview = document.getElementById('image-preview');
+
+        imageInput.addEventListener('change', handleImageUpload);
+
+        function handleImageUpload() {
+            clearImagePreview();
+            const file = imageInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const imageUrl = e.target.result;
+                    displayImagePreview(imageUrl, file);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function displayImagePreview(imageUrl, file) {
+            const imageItem = document.createElement('div');
+            imageItem.classList.add('image-preview-item', 'position-relative');
+
+            const thumbnail = document.createElement('img');
+            thumbnail.classList.add('image-thumbnail');
+            thumbnail.src = imageUrl;
+            thumbnail.alt = 'Preview';
+
+            const removeButton = document.createElement('button');
+            removeButton.classList.add('btn', 'btn-sm', 'remove-button', 'position-absolute', 'top-0', 'start-0');
+            removeButton.innerHTML = '<i class="fas fa-times"></i>';
+            removeButton.addEventListener('click', function () {
+                // Remove the image item when the remove button is clicked
+                imageItem.remove();
+            });
+
+            imageItem.appendChild(thumbnail);
+            imageItem.appendChild(removeButton);
+
+            imagePreview.appendChild(imageItem);
+        }
+
+        function clearImagePreview() {
+            imagePreview.innerHTML = '';
+        }
+
+    </script>
+    <%- include('../partials/adminFooter') %>

@@ -1,0 +1,225 @@
+<%- include('../partials/adminHeader') %>
+
+    <head>
+        <style>
+            .btn {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .btn:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+
+            .container {
+                overflow-x: hidden !important;
+                /* Hide horizontal overflow */
+                max-width: 1100px;
+                overflow-y: auto;
+                /* Add a vertical scrollbar if necessary */
+            }
+
+
+            table {
+                border-collapse: collapse;
+                border-spacing: 0;
+                width: 60%;
+
+                /* Ensure the table takes the full width */
+            }
+
+            table th,
+            table td {
+                padding: 1px;
+                /* Adjust the padding to control spacing */
+                text-align: left;
+                /* Adjust text alignment as needed */
+            }
+
+            table thead tr {
+                background-color: #f0f0f0;
+                /* Optional: Add a background color to the table header row */
+            }
+        </style>
+    </head>
+    <section class="container">
+        <h3 class="mb-4 text-center fs-1 h3-color">Sales Report</h3>
+        <br>
+        <button id="generatePDFButton" class="btn btn-block">Generate PDF</button>
+        <button id="generteXlButton" class="btn btn-block">Generate XL</button>
+        <br>
+        <br>
+        <form id="dateRangeForm" class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" class="form-control" id="startDate" name="startDate" style="width: 200px;"
+                        required>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" class="form-control" id="endDate" name="endDate" style="width: 200px;" required>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="statusFilter">Status:</label>
+                    <select class="form-control" id="statusFilter" name="statusFilter" style="width: 200px;">
+                        <option value="all">All</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Placed">Placed</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                        <option value="Returned">Returned</option>
+                        <option value="Requested For Cancel">Requested For Cancel</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3 mt-4">
+                <div class="form-group">
+                    <label for="viewReportButton"></label> <!-- Empty label for spacing -->
+                    <button type="button" class="btn  btn-block" id="viewReportButton">View Report</button>
+                </div>
+            </div>
+
+
+        </form>
+        <br>
+        <div id="salesReportResults" class="salesReport">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Product Category</th>
+                        <th>Product Name</th>
+                        <th>Ordered At</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (const item of result) { %>
+                        <tr>
+                            <td><%= item.username %></td>
+                            <td><%= item.productCategory %></td>
+                            <td><%= item.productName %></td>
+                            <td><%= item.createdAt.toDateString() %></td>
+                            <td><%= item.totalAmount %></td>
+                            <td><%= item.status %></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+        integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        const viewReportButton = document.getElementById("viewReportButton");
+        viewReportButton.addEventListener("click", () => {
+            // Get the selected start and end dates
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("endDate").value;
+            const statusFilter = document.getElementById("statusFilter").value;
+
+            // Prepare the request body
+            const data = JSON.stringify({ startDate, endDate, statusFilter });
+
+            // Make a fetch request to your server
+            fetch("/admin/getOrdersByDate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: data,
+            })
+                .then(response => response.json())
+                .then((data) => {
+
+                    // Process and display the orders as needed
+                    displaySalesReport(data.result);
+                })
+                .catch((error) => {
+                    console.error("There was a problem with the fetch operation:", error);
+                });
+        });
+        function displaySalesReport(result) {
+            const salesReportResults = document.getElementById("salesReportResults");
+            salesReportResults.innerHTML = ""; // Clear previous results
+
+            if (result.length === 0) {
+                salesReportResults.innerHTML = "<p>No sales data available for the selected date range.</p>";
+            } else {
+                // Create an HTML table or any other format to display the data
+                const table = document.createElement("table");
+                table.className = "table"; // You can apply Bootstrap styles
+                table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Username</th> 
+                        <th>Product Category</th> 
+                        <th>Product Name</th>                        
+                        <th>Ordered At</th>
+                        <th>Total Amount</th>
+                        <th>status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${result.map((result) => `
+                        <tr>
+                            <td>${result.username}</td>
+                            <td>${result.productCategory}</td>
+                            <td>${result.productName}</td>                    
+                            <td>${formatDate(result.createdAt)}</td>                           
+                            <td>${result.totalAmount}</td>
+                            <td>${result.status}</td>                            
+                        </tr>`).join('')}
+                </tbody>
+            `;
+
+                salesReportResults.appendChild(table);
+            }
+        }
+        const generatePDFButton = document.getElementById("generatePDFButton");
+
+        generatePDFButton.addEventListener("click", () => {
+            const pdfContent = document.getElementById("salesReportResults");
+            const pdfOptions = {
+                margin: 1,
+                filename: 'sales_report.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            };
+
+            // Use html2pdf to generate the PDF
+            html2pdf().set(pdfOptions).from(pdfContent).save();
+
+            //html2pdf(pdfContent);
+        });
+
+        const generateXLButton = document.getElementById("generteXlButton");
+
+        generateXLButton.addEventListener("click", () => {
+            const xlContent = document.getElementById("salesReportResults");
+            const ws = XLSX.utils.table_to_sheet(xlContent);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Data');
+            XLSX.writeFile(wb, 'sales_report.xlsx');
+        });
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+    </script>
+
+    <%- include('../partials/adminFooter') %>

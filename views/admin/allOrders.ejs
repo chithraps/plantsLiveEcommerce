@@ -1,0 +1,209 @@
+<%- include('../partials/adminHeader') %>
+
+    <head>
+        <style>
+            a {
+                text-decoration: none;
+            }
+
+            .page-number {
+                margin: 0 10px;
+                /* Adjust the margin as needed */
+            }
+
+            /* Styles for the modal */
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.7);
+            }
+
+            .modal-content {
+                background-color: #fff;
+                margin: 10% auto;
+                padding: 20px;
+                width: 30%;
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            }
+
+            .close {
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+
+            .btn {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .btn:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+
+            .filter-container {
+                float: right;
+                margin-right: 20px;
+                /* Adjust the margin as needed */
+            }
+        </style>
+    </head>
+    <div class="container mt-4 col">
+        <div class="filter-container">
+            <form action="/admin/viewAllOrders" method="get">
+                <label for="statusFilter">Filter by Status:</label>
+                <select id="statusFilter" name="status">
+                    <option value="">All</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Placed">Placed</option>
+                    <option value="Requested For Cancel">Requested For Cancel</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="Returned">Returned</option>
+                </select>
+                <button type="submit" class="btn">Apply Filter</button>
+            </form>
+        </div>
+        <br>
+        <h4>Your Orders</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Id</th>
+                    <th scope="col">Order Date</th>
+                    <th scope="col">Order Status</th>
+                    <th scope="col">Payment Method</th>
+                    <th scope="col">Total Amount</th>
+                    <th scope="col">Shipping Address</th>
+                    <th scope="col">Coupon Code</th>
+                    <th scope="col">Coupon Discount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% orders.forEach((order)=> { %>
+                    <tr>
+                        <td>
+                            <%= order._id %>
+                        </td>
+                        <td>
+                            <%= order.createdAt.toDateString() %>
+                        </td>
+                        <td>
+                            <%= order.status %>
+                        </td>
+                        <td>
+                            <%= order.paymentMethod %>
+                        </td>
+                        <td>
+                            <%= order.totalAmount %>
+                        </td>
+                        <td>
+                            <!-- Display shipping address fields -->
+                            <%= order.shippingAddress.fullName %><br>
+                                <%= order.shippingAddress.houseName %><br>
+                                    <%= order.shippingAddress.street %><br>
+                                        <%= order.shippingAddress.city %>,
+                                            <%= order.shippingAddress.state %><br>
+                                                <%= order.shippingAddress.postalCode %>
+                        </td>
+                        <td>
+                            <%= order.couponInformation.couponCode !== undefined ? order.couponInformation.couponCode : '-' %></td>
+                        </td>
+                        <td>
+                            <%= order.couponInformation.couponDiscount  !== undefined ? `₹${order.couponInformation.couponDiscount}` : '-' %>
+                        </td>
+                        <td>
+                            <a href="/admin/viewOrderedProducts?orderId=<%= order._id %>" class="btn">View Products</a>
+                        </td>
+                        <td>
+                            <% if (order.status !=='Cancelled' && order.status !=='Return' ) { %>
+                                <button class="btn update-status-button" data-order-id="<%= order._id %>">Update
+                                    Status</button>
+
+                                <% } %>
+                        </td>
+
+                    </tr>
+                    <div id="statusUpdateModal_<%= order._id %>" class="modal">
+                        <div class="modal-content">
+                            <span class="close" data-order-id="<%= order._id %>">&times;</span>
+                            <!-- Add your content for the status update here -->
+                            <h4>Update Status</h4>
+                            <form action="/admin/updateStatus" method="post" id="statusUpdateForm">
+                                <label for="orderStatus">Select Status:</label>
+                                <select id="orderStatus" name="orderStatus">
+
+                                    <option value="Placed">Placed</option>
+                                    <option value="Processing">Processing</option>
+                                    <option value="Shipped">Shipped</option>
+                                    <option value="Delivered">Delivered</option>
+                                </select>
+                                <input type="hidden" name="orderId" value="<%= order._id %>">
+                                <br>
+                                <button type="submit" class="btn">Update</button>
+                            </form>
+                        </div>
+                    </div>
+                    <% }); %>
+            </tbody>
+        </table>
+
+        <br>
+        <br>
+        <% for (let j=1; j <=totalPages; j++) { %>
+            <a href="?page=<%= j %>">
+                <span class="page-number">
+                    <%= j %>
+                </span>
+            </a>
+            <% } %>
+                <br>
+                <br>
+    </div>
+    <script>
+        // Function to show the modal
+        function showModal(orderId) {
+            const modal = document.getElementById(`statusUpdateModal_${orderId}`);
+            modal.style.display = 'block';
+        }
+
+        // Function to close the modal
+        function closeModal(orderId) {
+            const modal = document.getElementById(`statusUpdateModal_${orderId}`);
+            modal.style.display = 'none';
+        }
+
+        // Attach a click event handler to the "Update Status" buttons
+        document.addEventListener('DOMContentLoaded', function () {
+            const updateStatusButtons = document.querySelectorAll('.update-status-button');
+
+            updateStatusButtons.forEach(function (button) {
+                button.addEventListener('click', function (e) {
+                    e.stopPropagation(); // Prevent parent click event
+                    const orderId = button.getAttribute('data-order-id');
+                    showModal(orderId);
+                });
+            });
+
+            // Attach a click event handler to the close buttons (X)
+            const closeButtons = document.querySelectorAll('.close');
+            closeButtons.forEach(function (closeButton) {
+                closeButton.addEventListener('click', function (e) {
+                    e.stopPropagation(); // Prevent parent click event
+                    const orderId = closeButton.getAttribute('data-order-id');
+                    closeModal(orderId);
+                });
+            });
+        });
+    </script>
+
+    <%- include('../partials/adminFooter') %>

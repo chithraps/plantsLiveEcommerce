@@ -1,0 +1,130 @@
+<%- include('../partials/userHeader') %>
+
+    <head>
+        <style>
+            .container-class {
+                min-height: 400px;
+                /* Adjust the value to your desired minimum height */
+            }
+
+            .card {
+                background-color: rgb(221, 221, 221);
+            }
+
+            .btn {
+                background-color: rgb(66, 182, 105);
+                color: #ffffff;
+            }
+
+            .btn:hover {
+                background-color: rgb(19, 102, 47);
+                color: #ffffff;
+            }
+        </style>
+    </head>
+    <div class="container container-class mt-5">
+        <div class="row">
+            <div class="col-md-3 mt-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Your Orders</h5>
+                        <p class="card-text">View and manage your orders.</p>
+                        <a href="/viewOrders" class="btn ">Your Orders</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mt-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Edit Profile</h5>
+                        <p class="card-text">Edit Profile Informations.</p>
+                        <a href="/editProfile" class="btn ">Edit Profile</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mt-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Change Password</h5>
+                        <p class="card-text">Change your account password.</p>
+                        <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            Change Password
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mt-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Add Address</h5>
+                        <p class="card-text">Add Address To Your Account</p>
+                        <a href="/loadAddress" class="btn">Add Address</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Change Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Add your password change form here -->
+                    <form action="/changeProfiPassword" method="post" id="changePasswordForm">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Current Password</label>
+                            <input type="password" name="currentPassword" class="form-control" id="currentPassword" >
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" name="newPassword" class="form-control" id="newPassword" >
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" >
+                        </div>
+                        <button type="submit" class="btn ">Change Password</button>
+                    </form>
+                    <div class="error" id="error" style="color: red;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const form = document.getElementById("changePasswordForm");
+        const errorSpan = document.getElementById("error");
+    
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+    
+            const currentPassword = document.getElementById("currentPassword").value;
+            const newPassword = document.getElementById("newPassword").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+    
+            if (currentPassword === '' || newPassword === '' || confirmPassword === '') {
+                displayError("Password should not be empty");
+                return;
+            }
+    
+            if (newPassword !== confirmPassword) {
+                displayError("Password does not match");
+                return;
+            }
+            form.submit()
+            
+        });
+    
+        function displayError(errorMessage) {
+            errorSpan.textContent = errorMessage;
+        }
+    
+        function clearErrors() {
+            errorSpan.textContent = "";
+        }
+    </script>
+    
+    <%- include('../partials/footer') %>
