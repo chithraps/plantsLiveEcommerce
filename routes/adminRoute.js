@@ -86,6 +86,8 @@ admin_rout.get('/viewCoupons',auth.isLogin,couponController.loadViewCoupon)
 
 admin_rout.get('/editCoupon',auth.isLogin,couponController.loadEditCoupon)
 
+admin_rout.post('/editCoupon',auth.isLogin,couponController.editCoupon)
+
 admin_rout.get('/deleteCoupon',auth.isLogin,couponController.deleteCoupon)
 
 //order management

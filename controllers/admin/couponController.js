@@ -71,29 +71,58 @@ const loadEditCoupon = async (req, res) => {
 }
 const deleteCoupon = async (req, res) => {
     try {
-
         const couponId = req.query.id;
-        console.log(couponId)
         const couponDetails = await coupons.findOne({ _id: couponId });
-        console.log(couponDetails, couponDetails.isDeleted)
-        if (couponDetails.isDeleted) {
-            console.log("in if")
-            const updatedCoupon = await couponDetails.updateOne({ _id: couponId }, { $set: { isDeleted: false } })
-        } else {
-            console.log("in else")
-            const updatedCoupon = await couponDetails.updateOne({ _id: couponId }, { $set: { isDeleted: true } })
+
+        if (!couponDetails) {
+            console.log("Coupon not found");
+            return res.status(404).send("Coupon not found");
         }
 
-        res.render('adminDashboard')
+        if (couponDetails.isDeleted) {
+            console.log("in if");
+            couponDetails.isDeleted = false;
+        } else {
+            console.log("in else");
+            couponDetails.isDeleted = true;
+        }
+
+        await couponDetails.save(); 
+
+        const allCoupons = await coupons.find({});
+        res.render('viewCoupons', { coupons: allCoupons });
+
     } catch (error) {
-        console.log(error.messge)
+        console.log("Error in deleteCoupon:", error.message);
+        res.status(500).send("Server Error");
     }
-}
+};
+const editCoupon = async (req, res) => {
+  try {
+    const { couponId, validFrom, validTo } = req.body;
+
+    const updated = await coupons.findByIdAndUpdate(couponId, {
+      validFrom: new Date(validFrom),
+      validTo: new Date(validTo),
+    });
+
+    const coupon = await coupons.findById(couponId);
+    res.render('admin/editCoupon', {
+      coupon,
+      message: "Coupon updated successfully",
+    });
+  } catch (err) {
+    console.error("Error updating coupon:", err.message);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
 
 module.exports = {
     loadCreateCoupon,
     createCoupon,
     loadViewCoupon,
     loadEditCoupon,
+    editCoupon,
     deleteCoupon
 }
