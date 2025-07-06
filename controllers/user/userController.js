@@ -279,7 +279,7 @@ const sendPasswordLink = async (req, res) => {
         subject: 'Password Reset',
         html: `
         <p>You are receiving this email because you requested a password reset for your account.</p>
-        <p>Please click this <a href="http://localhost:3000/changePassword">link</a> to reset your password.</p>
+        <p>Please click this <a href="https://botanicbazaar.live/changePassword">link</a> to reset your password.</p>
         <p>If you didn't request this, please ignore this email.</p>
       `
       };
