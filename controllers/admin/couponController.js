@@ -107,7 +107,7 @@ const editCoupon = async (req, res) => {
     });
 
     const coupon = await coupons.findById(couponId);
-    res.render('admin/editCoupon', {
+    res.render('editCoupon', {
       coupon,
       message: "Coupon updated successfully",
     });
