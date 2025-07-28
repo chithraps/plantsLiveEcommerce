@@ -1,0 +1,98 @@
+<%- include('../partials/userHeader') %>
+
+<div class="container mt-5 mb-5">
+  <div class="container mt-5 mb-5" id="invoice-content">
+    <h2 class="mb-4">Order Details</h2>
+   <div class="text-end mb-3">
+  <button id="downloadInvoice" class="btn btn-danger">Download Invoice</button>
+</div>
+    <!-- Order Info Card -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">Order Information</div>
+      <div class="card-body">
+        <p><strong>Order ID:</strong> <%= order._id %></p>
+        <p>
+          <strong>Status:</strong>
+          <span class="badge bg-info"><%= order.status %></span>
+        </p>
+        <p>
+          <strong>Ordered On:</strong> <%= order.createdAt.toDateString() %>
+        </p>
+        <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+        <p><strong>Total Amount:</strong> ₹<%= order.totalAmount %></p>
+      </div>
+    </div>
+
+    <!-- Shipping Address Card -->
+    <div class="card mb-4">
+      <div class="card-header bg-success text-white">Shipping Address</div>
+      <div class="card-body">
+        <p><strong>Name:</strong> <%= order.shippingAddress.fullName %></p>
+        <p>
+          <%= order.shippingAddress.houseName %><br />
+          <%= order.shippingAddress.street %><br />
+          <%= order.shippingAddress.city %>, <%= order.shippingAddress.state
+          %><br />
+          <%= order.shippingAddress.postalCode %>
+        </p>
+      </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="card mb-4">
+      <div class="card-header bg-warning text-dark">Ordered Items</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">Image</th>
+              <th scope="col">Product Name</th>
+              <th scope="col">Qty</th>
+              <th scope="col">Price</th>
+              <th scope="col">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% order.items.forEach(item => { %>
+            <tr>
+              <td>
+                <img
+                  src="<%= item.productId.images[0] %>"
+                  width="80"
+                  height="80"
+                  class="img-thumbnail"
+                />
+              </td>
+              <td><%= item.productId.name %></td>
+              <td><%= item.quantity %></td>
+              <td>₹<%= item.price %></td>
+              <td>₹<%= item.quantity * item.price %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- Back Button -->
+  <div class="text-end">
+    <a href="/viewOrders" class="btn btn-secondary">Back to Orders</a>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  document.getElementById('downloadInvoice').addEventListener('click', () => {
+    const invoice = document.getElementById('invoice-content');
+
+    const opt = {
+      margin:       0.5,
+      filename:     'invoice_<%= order._id %>.pdf',
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(invoice).save();
+  });
+</script>
+<%- include('../partials/footer') %>

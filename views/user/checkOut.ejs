@@ -256,6 +256,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
+        const retryMode = <%= typeof retryMode !== 'undefined' ? (retryMode ? 'true' : 'false') : 'false' %>;
+    const orderId = "<%= typeof orderId !== 'undefined' ? orderId : '' %>";
         // JavaScript to show/hide the "Add New Address" form
         document.addEventListener("DOMContentLoaded", function () {
             const addNewAddressBtn = document.getElementById("addNewAddressBtn");
@@ -346,14 +348,14 @@
                     alert("Please select a shipping address and payment method.");
                     return;
                 }
-
-
+                
                 // Prepare the data to send to the server
                 const orderData = {
                     selectedAddress: selectedAddress.value,
                     paymentMethod: paymentMethod.value,
                     totalPrice: totalPrice,
-                    newTotalAmount: newTotalAmount
+                    newTotalAmount: newTotalAmount,
+                    orderId
                 };
 
                 // Send an AJAX request to place the order

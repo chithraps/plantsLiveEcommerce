@@ -1,286 +1,299 @@
 <%- include('../partials/userHeader') %>
 
-    <head>
-        <style>
-            /* Apply styling to make it appear as a single table */
-            .merged-table {
-                border-collapse: collapse;
-                width: 100%;
-            }
+<head>
+  <style>
+    /* Apply styling to make it appear as a single table */
+    .merged-table {
+      border-collapse: collapse;
+      width: 100%;
+    }
 
-            .merged-table th,
-            .merged-table td {
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: left;
-            }
+    .merged-table th,
+    .merged-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
 
-            .merged-table th {
-                background-color: #f2f2f2;
-            }
+    .merged-table th {
+      background-color: #f2f2f2;
+    }
 
-            /* Style the nested table to remove cell borders */
-            .nested-table {
-                border-collapse: collapse;
-            }
+    /* Style the nested table to remove cell borders */
+    .nested-table {
+      border-collapse: collapse;
+    }
 
-            .nested-table th,
-            .nested-table td {
-                border: none;
-                padding: 8px;
-                text-align: left;
-            }
+    .nested-table th,
+    .nested-table td {
+      border: none;
+      padding: 8px;
+      text-align: left;
+    }
 
-            .container {
+    .container {
+      overflow: hidden;
+      /* Adjust the value to your desired minimum height */
+    }
 
-                overflow: hidden;
-                /* Adjust the value to your desired minimum height */
-            }
+    .card {
+      background-color: rgb(221, 221, 221);
+    }
 
-            .card {
-                background-color: rgb(221, 221, 221);
-            }
+    .btn {
+      background-color: rgb(66, 182, 105);
+      color: #ffffff;
+    }
 
-            .btn {
-                background-color: rgb(66, 182, 105);
-                color: #ffffff;
-            }
+    .btn:hover {
+      background-color: rgb(19, 102, 47);
+      color: #ffffff;
+    }
 
-            .btn:hover {
-                background-color: rgb(19, 102, 47);
-                color: #ffffff;
-            }
+    a {
+      text-decoration: none;
+    }
 
-            a {
-                text-decoration: none;
-            }
+    .page-number {
+      margin: 0 10px;
+      /* Adjust the margin as needed */
+    }
 
-            .page-number {
-                margin: 0 10px;
-                /* Adjust the margin as needed */
-            }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
 
-            .modal {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.7);
-            }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      width: 30%;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    }
 
-            .modal-content {
-                background-color: #fff;
-                margin: 10% auto;
-                padding: 20px;
-                width: 30%;
-                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-            }
+    .close {
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<div class="container mt-5 mb-4">
+  <h4>Your Orders</h4>
 
-            .close {
-                float: right;
-                font-size: 28px;
-                font-weight: bold;
-                cursor: pointer;
-            }
-        </style>
-    </head>
-    <div class="container mt-5 mb-4">
-        <h4>Your Orders</h4>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">Order ID</th>
+        <th scope="col">Order Date</th>
+        <th scope="col">Order Status</th>
+        <th scope="col">Shipping Address</th>
+        <th>Product Image</th>
+        <th>Product Name</th>
+        <th>Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% userOrders.forEach((order)=> { %>
+      <tr>
+        <td><%= order._id %></td>
+        <td><%= order.createdAt.toDateString() %></td>
+        <td><%= order.status %></td>
+        <td>
+          <%= order.shippingAddress.fullName %><br />
+          <%= order.shippingAddress.houseName %><br />
+          <%= order.shippingAddress.street %><br />
+          <%= order.shippingAddress.city %>, <%= order.shippingAddress.state
+          %><br />
+          <%= order.shippingAddress.postalCode %>
+        </td>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th scope="col">Order ID</th>
-                    <th scope="col">Order Date</th>
-                    <th scope="col">Order Status</th>
-                    <th scope="col">Shipping Address</th>
-                    <th>Product Image</th>
-                    <th>Product Name</th>
-                    <th>Price</th>
+        <td colspan="5">
+          <table class="nested-table">
+            <% order.items.forEach((item)=> { %>
+            <tr>
+              <td>
+                <img
+                  src="<%= item.productId.images[0] %>"
+                  alt="<%= item.productId.name %>"
+                  class="img-thumbnail"
+                  width="100"
+                />
+              </td>
+              <td><%= item.productId.name %></td>
+              <td><%= item.price %></td>
+            </tr>
+            <% }); %>
+          </table>
+        </td>
 
-                </tr>
-            </thead>
-            <tbody>
-                <% userOrders.forEach((order)=> { %>
-                    <tr>
-                        <td>
-                            <%= order._id %>
-                        </td>
-                        <td>
-                            <%= order.createdAt.toDateString() %>
-                        </td>
-                        <td>
-                            <%= order.status %>
-                        </td>
-                        <td>
-                            <%= order.shippingAddress.fullName %><br>
-                                <%= order.shippingAddress.houseName %><br>
-                                    <%= order.shippingAddress.street %><br>
-                                        <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %><br>
-                                                <%= order.shippingAddress.postalCode %>
-                        </td>
-                        
-                        <td colspan="5">
-                            <table class="nested-table">
+        <td>
+            <% if (order.status === "Pending") { %>
+    <a href="/retryPayment/<%= order._id %>" class="btn btn-warning">Retry Payment</a>
+  <% } %>
+          <% if (order.status !=="Cancelled" && order.status !=="Requested For Cancel" && order.status !=="Delivered" && order.status !=="Pending") { %>
+          <a
+            href="#"
+            class="btn cancel-order-button"
+            data-order-id="<%= order._id %>"
+            >Cancel Order</a
+          >
+          <% } %> <% if ( order.status==="Delivered" ) { %>
+          <a
+            href="#"
+            class="btn return-order-button"
+            data-order-id="<%= order._id %>"
+            >Return Order</a
+          >
+          <% } %>
+        </td>
+        <td>
+          <a href="/orderDetails/<%= order._id %>"> view order </a>
+        </td>
+      </tr>
+      <div id="cancelOrderModal_<%= order._id %>" class="modal">
+        <div class="modal-content">
+          <span class="close" data-order-id="<%= order._id %>">&times;</span>
+          <input
+            type="hidden"
+            id="paymentMethod_<%= order._id %>"
+            value="<%= order.paymentMethod %>"
+          />
 
-                                <% order.items.forEach((item)=> { %>
-                                    <tr>
-                                        <td><img src="<%= item.productId.images[0] %>" alt="<%= item.productId.name %>"
-                                                class="img-thumbnail" width="100"></td>
-                                        <td>
-                                            <%= item.productId.name %>
-                                        </td>
-                                        <td>
-                                            <%= item.price %>
-                                        </td>
-                                    </tr>
-                                    <% }); %>
-                            </table>
-                        </td>
-                       
-                        <td>
-                            <% if (order.status !=="Cancelled" && order.status !=="Requested For Cancel" && order.status
-                                !=="Delivered" ) { %>
-                                <a href="#" class="btn cancel-order-button" data-order-id="<%= order._id %>">Cancel
-                                    Order</a>
-                                <% } %>
-                                    <% if ( order.status==="Delivered" ) { %>
-                                        <a href="#" class="btn return-order-button"
-                                            data-order-id="<%= order._id %>">Return Order</a>
-                                        <% } %>
-                        </td>
-                    </tr>
-                    <div id="cancelOrderModal_<%= order._id %>" class="modal">
-                        <div class="modal-content">
-                            <span class="close" data-order-id="<%= order._id %>">&times;</span>
-                            <input type="hidden" id="paymentMethod_<%= order._id %>" value="<%= order.paymentMethod %>">
+          <p>Are you sure you want to cancel this order?</p>
+          <label for="cancelReason">Select a reason:</label>
+          <select id="cancelReason_<%= order._id %>" name="cancelReason">
+            <option value="Ordered by mistake">Ordered by mistake</option>
+            <option value="Item no longer needed">Item no longer needed</option>
+            <option value="Changed my mind">Changed my mind</option>
+            <option value="Changed delivery address">
+              Changed delivery address
+            </option>
+            <option value="Shipping delay">Shipping delay</option>
+            <!-- Add more reasons as needed -->
+          </select>
+          <br />
+          <button
+            class="btn confirm-cancel-button"
+            data-order-id="<%= order._id %>"
+          >
+            Cancel Order
+          </button>
+        </div>
+      </div>
+      <% }); %>
+    </tbody>
+  </table>
+  <br />
+  <br />
+  <% for (let j=1; j <=totalPages; j++) { %>
+  <a href="?page=<%= j %>">
+    <span class="page-number"> <%= j %> </span>
+  </a>
+  <% } %>
+  <br />
+  <br />
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+  function showCancelModal(orderId) {
+    const modal = document.getElementById(`cancelOrderModal_${orderId}`);
+    modal.style.display = "block";
+  }
 
-                            <p>Are you sure you want to cancel this order?</p>
-                            <label for="cancelReason">Select a reason:</label>
-                            <select id="cancelReason_<%= order._id %>" name="cancelReason">
-                                <option value="Ordered by mistake">Ordered by mistake</option>
-                                <option value="Item no longer needed">Item no longer needed</option>
-                                <option value="Changed my mind">Changed my mind</option>
-                                <option value="Changed delivery address">Changed delivery address</option>
-                                <option value="Shipping delay">Shipping delay</option>
-                                <!-- Add more reasons as needed -->
-                            </select>
-                            <br>
-                            <button class="btn confirm-cancel-button" data-order-id="<%= order._id %>">
-                                Cancel Order
-                            </button>
-                        </div>
-                    </div>
-                    <% }); %>
-            </tbody>
-        </table>
-        <br>
-        <br>
-        <% for (let j=1; j <=totalPages; j++) { %>
-            <a href="?page=<%= j %>">
-                <span class="page-number">
-                    <%= j %>
-                </span>
-            </a>
-            <% } %>
-                <br>
-                <br>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    <script>
+  function closeCancelModal(orderId) {
+    const modal = document.getElementById(`cancelOrderModal_${orderId}`);
+    modal.style.display = "none";
+  }
 
-        function showCancelModal(orderId) {
-            const modal = document.getElementById(`cancelOrderModal_${orderId}`);
-            modal.style.display = 'block';
-        }
+  document.addEventListener("DOMContentLoaded", function () {
+    const cancelOrderButtons = document.querySelectorAll(
+      ".cancel-order-button"
+    );
 
+    cancelOrderButtons.forEach(function (button) {
+      button.addEventListener("click", function (e) {
+        e.preventDefault(); // Prevent the default link behavior
+        const orderId = button.getAttribute("data-order-id");
+        showCancelModal(orderId);
+      });
+    });
 
-        function closeCancelModal(orderId) {
-            const modal = document.getElementById(`cancelOrderModal_${orderId}`);
-            modal.style.display = 'none';
-        }
+    const closeButtons = document.querySelectorAll(".close");
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const cancelOrderButtons = document.querySelectorAll('.cancel-order-button');
+    closeButtons.forEach(function (closeButton) {
+      closeButton.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const orderId = closeButton.getAttribute("data-order-id");
+        closeCancelModal(orderId);
+      });
+    });
 
-            cancelOrderButtons.forEach(function (button) {
-                button.addEventListener('click', function (e) {
-                    e.preventDefault(); // Prevent the default link behavior
-                    const orderId = button.getAttribute('data-order-id');
-                    showCancelModal(orderId);
+    const modalButtons = document.querySelectorAll(".confirm-cancel-button");
+    modalButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const orderId = button.getAttribute("data-order-id");
+        const cancelReason = document.getElementById(
+          `cancelReason_${orderId}`
+        ).value;
+        const paymentMethod = document.getElementById(
+          `paymentMethod_${orderId}`
+        ).value;
+
+        fetch("/cancelOrder", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ orderId, cancelReason }),
+        })
+          .then((response) => {
+            if (response.ok) {
+              const modal = document.getElementById(
+                `cancelOrderModal_${orderId}`
+              );
+              modal.style.display = "none";
+
+              if (paymentMethod === "Razorpay" || paymentMethod === "Wallet") {
+                Swal.fire({
+                  title: "Order Cancelled!",
+                  text: "Your order cancellation request has been processed successfully. We will initiate the refund once it has been approved.",
+                  icon: "success",
+                }).then(() => {
+                  window.location.href = "/viewOrders"; // Reload the page after the user acknowledges the alert
                 });
-            });
-
-            const closeButtons = document.querySelectorAll('.close');
-
-            closeButtons.forEach(function (closeButton) {
-                closeButton.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    const orderId = closeButton.getAttribute('data-order-id');
-                    closeCancelModal(orderId);
+              } else if (paymentMethod === "Cash on Delivery") {
+                Swal.fire({
+                  title: "Order Cancelled!",
+                  text: "Your order cancellation request has been processed successfully.",
+                  icon: "success",
+                }).then(() => {
+                  window.location.href = "/viewOrders"; // Reload the page after the user acknowledges the alert
                 });
-            });
-
-
-            const modalButtons = document.querySelectorAll('.confirm-cancel-button');
-            modalButtons.forEach((button) => {
-                button.addEventListener('click', function () {
-                    const orderId = button.getAttribute('data-order-id');
-                    const cancelReason = document.getElementById(`cancelReason_${orderId}`).value;
-                    const paymentMethod = document.getElementById(`paymentMethod_${orderId}`).value;
-
-                    fetch('/cancelOrder', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ orderId, cancelReason }),
-                    })
-                        .then((response) => {
-                            if (response.ok) {
-                                const modal = document.getElementById(`cancelOrderModal_${orderId}`);
-                                modal.style.display = 'none';
-
-
-                                if (paymentMethod === 'Razorpay' || paymentMethod === 'Wallet') {
-                                    Swal.fire({
-                                        title: 'Order Cancelled!',
-                                        text: 'Your order cancellation request has been processed successfully. We will initiate the refund once it has been approved.',
-                                        icon: 'success',
-                                    }).then(() => {
-                                        window.location.href = '/viewOrders'; // Reload the page after the user acknowledges the alert
-                                    });
-                                } else if (paymentMethod === 'Cash on Delivery') {
-                                    Swal.fire({
-                                        title: 'Order Cancelled!',
-                                        text: 'Your order cancellation request has been processed successfully.',
-                                        icon: 'success',
-                                    }).then(() => {
-                                        window.location.href = '/viewOrders'; // Reload the page after the user acknowledges the alert
-                                    });
-                                } else {
-
-                                    Swal.fire({
-                                        title: 'Order Cancelled!',
-                                        text: 'Your order cancellation request has been processed successfully.',
-                                        icon: 'success',
-                                    }).then(() => {
-                                        window.location.href = '/viewOrders'; // Reload the page after the user acknowledges the alert
-                                    });
-                                }
-
-                            } else {
-
-                            }
-                        })
-                        .catch((error) => {
-                            // Handle network errors
-                        });
+              } else {
+                Swal.fire({
+                  title: "Order Cancelled!",
+                  text: "Your order cancellation request has been processed successfully.",
+                  icon: "success",
+                }).then(() => {
+                  window.location.href = "/viewOrders"; // Reload the page after the user acknowledges the alert
                 });
-            });
-        });
-
-    </script>
-    <%- include('../partials/footer') %>
+              }
+            } else {
+            }
+          })
+          .catch((error) => {
+            // Handle network errors
+          });
+      });
+    });
+  });
+</script>
+<%- include('../partials/footer') %>

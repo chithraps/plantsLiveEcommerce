@@ -28,7 +28,7 @@
 
                         <h3 class="mb-4 text-center fs-1 h3-color">Verify OTP</h3>
                         <br>
-                        <p>OTP will expire in: <span id="otpTimer"></span> 1 minute</p>
+                        <p>OTP will expire in: <span id="otpTimer">01:00</span></p>
                         <!-- Email input -->
                         <div class="form-floating mb-3">
                             <input type="hidden" name="email" value="<%= email %>">
@@ -66,6 +66,24 @@
         </div>
     </section>
     <script>
-        
+        let timeLeft = 60; // 60 seconds
+
+    const timerDisplay = document.getElementById("otpTimer");
+
+    const countdown = setInterval(() => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+
+        timerDisplay.textContent =
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        timeLeft--;
+
+        if (timeLeft < 0) {
+            clearInterval(countdown);
+            timerDisplay.textContent = "Expired";
+            document.getElementById("otp").disabled = true;
+        }
+    }, 1000);
     </script>
     <%- include('../partials/footer') %>

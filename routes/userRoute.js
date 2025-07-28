@@ -90,6 +90,10 @@ user_rout.get('/viewOrders',auth.isLogin,orderController.viewOrders)
 
 user_rout.post('/cancelOrder',orderController.cancelOrder)
 
+user_rout.get('/orderDetails/:orderId', orderController.getOrderDetails);
+
+user_rout.get('/retryPayment/:orderId',orderController.retryPayment)
+
 //manage profile
 
 user_rout.post('/addNewAddress',profileController.addNewAddress)
