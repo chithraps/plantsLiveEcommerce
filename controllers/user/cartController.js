@@ -70,6 +70,7 @@ const loadViewCart = async (req, res) => {
             let totalPrice = 0;
             const userId = userData._id;
             const userCart = await carts.findOne({ userId }).populate('items.productId')
+            console.log("userCart ",userCart)
             if (!userCart) {
                 res.render('emptyCart');
             }
@@ -80,6 +81,7 @@ const loadViewCart = async (req, res) => {
             userCart.items.forEach((item) => {
                 const product = item.productId;
                 const itemPrice = product.price;
+                console.log(itemPrice," ",product)
                 let itemDiscountedPrice = itemPrice;
                 if (product.offer && product.offer.startDate <= new Date() && product.offer.endDate >= new Date()) {
                     // Calculate the updated price with the discount
@@ -91,7 +93,7 @@ const loadViewCart = async (req, res) => {
 
                 // Multiply the discounted price by the item's quantity
                 totalPrice += itemDiscountedPrice * item.quantity;
-                console.log(totalPrice)
+                console.log("totalPrice ",totalPrice)
             })
 
 
@@ -101,7 +103,7 @@ const loadViewCart = async (req, res) => {
             res.redirect('/')
         }
     } catch (error) {
-        console.log(error.message);
+        console.log(" error is ",error.message);
     }
 }
 const updateCart = async (req, res) => {

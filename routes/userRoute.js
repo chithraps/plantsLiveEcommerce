@@ -74,8 +74,9 @@ user_rout.get('/goToCheckout',auth.isLogin,checkOutController.loadCheckout)
 
 //wishList management
 
-user_rout.post('/saveToWishlist',wishListController.addToWishlist)
-
+user_rout.post('/saveToWishlist',auth.isLogin,wishListController.addToWishlist)
+user_rout.post('/delete',auth.isLogin,wishListController.removeProduct)
+user_rout.get('/moveToCart',auth.isLogin,wishListController.moveToCart)
 user_rout.get('/loadWishList',auth.isLogin,wishListController.loadWishList)
 
 //order management 
