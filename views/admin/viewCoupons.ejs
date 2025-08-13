@@ -2,6 +2,15 @@
 
 <head>
   <style>
+    
+.pagination {
+    justify-content: center;
+  }
+  .page-item.active .page-link {
+    background-color: rgb(66, 182, 105);
+    border-color: rgb(66, 182, 105);
+    color: white;
+  }
     .btn-class {
       background-color: rgb(66, 182, 105);
       color: #ffffff;
@@ -94,5 +103,14 @@
       </tbody>
     </table>
   </div>
+  <div class="pagination mt-4">
+  <ul class="pagination">
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+      </li>
+    <% } %>
+  </ul>
+</div>
 </div>
 <%- include('../partials/adminFooter') %>

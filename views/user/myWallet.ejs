@@ -2,39 +2,89 @@
 <head>
     <style>
         body {
-            overflow-y: hidden; /* Disable vertical scrollbar */
+            overflow-y: auto; 
         }
 
         .container {
-            min-height: 400px;
-            padding: 20px; /* Add some padding for better spacing */
+            min-height: 500px;
+            padding: 20px; 
         }
 
         .card {
-            border: none; /* Remove card border */
+            border: none;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .card-header {
-            background-color: #e9d9da; /* Change header background color */
+            background-color: #e9d9da; 
         }
 
         .card-title {
-            color: #2bb843; /* Change card title color */
+            color: #2bb843; 
+        }
+
+        .transaction-table th {
+            background-color: #f8f9fa;
+        }
+
+        .credit {
+            color: green;
+            font-weight: bold;
+        }
+
+        .debit {
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
 <div class="container mt-5">
     <div class="row">
-        <div class="col-md-6 mx-auto">
-            <div class="card">
+        <div class="col-md-8 mx-auto">
+            <div class="card mb-4">
                 <div class="card-header text-white">
                     <h5 class="card-title">My Wallet</h5>
                 </div>
                 <div class="card-body">
                     <h6 class="card-subtitle mb-2 text-muted">Current Balance</h6>
-                    <h4 class="card-title"><i class="fa-solid fa-indian-rupee-sign"></i><%= balance.toFixed(2) %></h4>
+                    <h4 class="card-title">
+                        <i class="fa-solid fa-indian-rupee-sign"></i>
+                        <%= balance.toFixed(2) %>
+                    </h4>
                     <hr>
+                    <h6>Transaction History</h6>
+                    <% if (transactions && transactions.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-striped transaction-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% transactions.forEach(tx => { %>
+                                        <tr>
+                                            <td><%= new Date(tx.date).toLocaleString() %></td>
+                                            <td class="<%= tx.type %>"><%= tx.type.charAt(0).toUpperCase() + tx.type.slice(1) %></td>
+                                            <td>
+                                                <% if (tx.type === 'credit') { %>
+                                                    +<i class="fa-solid fa-indian-rupee-sign"></i><%= tx.amount.toFixed(2) %>
+                                                <% } else { %>
+                                                    -<i class="fa-solid fa-indian-rupee-sign"></i><%= tx.amount.toFixed(2) %>
+                                                <% } %>
+                                            </td>
+                                            <td><%= tx.description %></td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p>No transactions yet.</p>
+                    <% } %>
                 </div>
             </div>
         </div>

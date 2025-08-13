@@ -86,11 +86,16 @@ const placeOrder = async (req, res) => {
   try {
     const user = req.session.userData;
     if (!user.is_Blocked) {
-      const { selectedAddress, paymentMethod, totalPrice, newTotalAmount,orderId } =
-        req.body;
+      const {
+        selectedAddress,
+        paymentMethod,
+        totalPrice,
+        newTotalAmount,
+        orderId,
+      } = req.body;
       let totalAmountDisplayed = 0;
       const userId = req.session.userData._id;
-      console.log("in place order")
+      console.log("in place order");
       const codeObject = req.session[userId];
 
       let couponCode = null;
@@ -128,43 +133,50 @@ const placeOrder = async (req, res) => {
           }); // Stop further execution if there's a stock issue
         }
       }*/
-     let transformedItems = [];
+      let transformedItems = [];
 
-    if (orderId) {
-      
-      const existingOrder = await orders.findOne({ _id: orderId, userId }).populate("items.productId");
-      if (!existingOrder) return res.status(404).json({ error: "Order not found for retry." });
+      if (orderId) {
+        const existingOrder = await orders
+          .findOne({ _id: orderId, userId })
+          .populate("items.productId");
+        if (!existingOrder)
+          return res.status(404).json({ error: "Order not found for retry." });
 
-      transformedItems = existingOrder.items.map(item => ({
-        productId: item.productId._id,
-        quantity: item.quantity,
-        price: item.productId.price,
-      }));
+        transformedItems = existingOrder.items.map((item) => ({
+          productId: item.productId._id,
+          quantity: item.quantity,
+          price: item.productId.price,
+        }));
+      } else {
+        // 🛒 Normal mode: Fetch items from cart
+        const cart = await carts
+          .findOne({ userId })
+          .populate("items.productId");
+        if (!cart || cart.items.length === 0) {
+          return res.status(400).json({ error: "Cart is empty" });
+        }
 
-    } else {
-      // 🛒 Normal mode: Fetch items from cart
-      const cart = await carts.findOne({ userId }).populate("items.productId");
-      if (!cart || cart.items.length === 0) {
-        return res.status(400).json({ error: "Cart is empty" });
-      }
+        transformedItems = cart.items.map((cartItem) => ({
+          productId: cartItem.productId._id,
+          quantity: cartItem.quantity,
+          price: cartItem.productId.price,
+        }));
 
-      transformedItems = cart.items.map(cartItem => ({
-        productId: cartItem.productId._id,
-        quantity: cartItem.quantity,
-        price: cartItem.productId.price,
-      }));
-
-      for (const item of cart.items) {
-        const result = await updateProductStock(item.productId, item.quantity, res);
-        if (!result) {
-          const product = await products.findById(item.productId);
-          return res.json({
-            status: false,
-            message: `Insufficient stock for product ${product.name}`,
-          });
+        for (const item of cart.items) {
+          const result = await updateProductStock(
+            item.productId,
+            item.quantity,
+            res
+          );
+          if (!result) {
+            const product = await products.findById(item.productId);
+            return res.json({
+              status: false,
+              message: `Insufficient stock for product ${product.name}`,
+            });
+          }
         }
       }
-    }
 
       const user = await users.findById(userId);
 
@@ -192,34 +204,34 @@ const placeOrder = async (req, res) => {
       );*/
 
       let savedOrder;
-    if (orderId) {
-      savedOrder = await orders.findOneAndUpdate(
-        { _id: orderId },
-        {
-          items: transformedItems,
-          totalAmount,
-          shippingAddress: address,
-          paymentMethod,
-          couponInformation: {
-            couponCode,
-            couponDiscount: discountPrice,
+      if (orderId) {
+        savedOrder = await orders.findOneAndUpdate(
+          { _id: orderId },
+          {
+            items: transformedItems,
+            totalAmount,
+            shippingAddress: address,
+            paymentMethod,
+            couponInformation: {
+              couponCode,
+              couponDiscount: discountPrice,
+            },
+            status: "Pending",
+            updatedAt: Date.now(),
           },
-          status: "Pending",
-          updatedAt: Date.now()
-        },
-        { new: true }
-      );
-    } else {
-      savedOrder = await createNewOrder(
-        userId,
-        transformedItems,
-        totalAmount,
-        address,
-        paymentMethod,
-        couponCode,
-        discountPrice
-      );
-    }
+          { new: true }
+        );
+      } else {
+        savedOrder = await createNewOrder(
+          userId,
+          transformedItems,
+          totalAmount,
+          address,
+          paymentMethod,
+          couponCode,
+          discountPrice
+        );
+      }
 
       console.log(savedOrder);
 
@@ -255,6 +267,13 @@ const placeOrder = async (req, res) => {
           res.json({ status: false, message: "Insufficient wallet balance" });
         } else {
           wallet.balance -= totalAmount;
+
+          wallet.transactions.push({
+            type: "debit",
+            amount: totalAmount,
+            description: `Order payment for Order ID: ${savedOrder._id}`,
+            referenceId: savedOrder._id.toString(),
+          });
           const updatedWallet = await wallet.save();
           if (updatedWallet) {
             //savedOrder._id
@@ -339,19 +358,18 @@ const cancelOrder = async (req, res) => {
       const order = await orders.findById(orderId);
       const items = order.items;
 
-      // Iterate through the items and update product quantities
+     
       for (const item of items) {
         const productId = item.productId;
         const quantity = item.quantity;
 
-        // Update the product quantity in the products collection
         const product = await products.findById(productId);
         product.stock_count += quantity;
         await product.save();
       }
       const orderStatus = await orders.updateOne(
         { _id: orderId },
-        { $set: { status: "Requested For Cancel" } }
+        { $set: { status: "Cancelled" } }
       );
       console.log(orderStatus);
       if (order.paymentMethod !== "Cash on Delivery") {
@@ -365,6 +383,27 @@ const cancelOrder = async (req, res) => {
           reason: cancelReason,
         });
         const refundData = await refund.save();
+        let wallet = await wallets.findOne({ userId });
+        if (!wallet) {
+          
+          wallet = new wallets({
+            userId,
+            balance: 0,
+            transactions: [],
+          });
+        }
+
+        wallet.balance += amount;
+
+        
+        wallet.transactions.push({
+          type: "credit",
+          amount: amount,
+          description: `Refund for cancelled order: ${orderId}`,
+          referenceId: orderId.toString(),
+        });
+
+        await wallet.save();
       }
       res.json({ success: true });
     } else {
@@ -433,56 +472,53 @@ const getOrderDetails = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-const retryPayment = async (req,res) => {
-    try {
-        const user = req.session.userData;
-        if (!user || user.is_Blocked) {
-            req.session.destroy();
-            return res.redirect('/');
-        } 
-
-        const userId = user._id;
-        const orderId = req.params.orderId;
-
-        // Fetch the original order
-        const order = await orders.findOne({ _id: orderId, userId }).populate('items.productId');
-        console.log(" order ",order)
-
-        if (!order) {
-            return res.status(404).send('Order not found.');
-        }
-
-        
-        const totalPrice = order.totalAmount;
-
-        
-        const updatedUser = await users.findById(userId);
-        const addresses = updatedUser.address;
-        const userWallet = await wallets.findOne({ userId });
-        const userBalance = userWallet ? userWallet.balance : 0;
-        const hasSufficientBalance = userBalance >= totalPrice;
-
-        
-        const mockCart = {
-            items: order.items,
-        };
-
-        
-        res.render('checkOut', {
-            cart: mockCart,
-            count: order.items.length,
-            totalPrice,
-            addresses,
-            userBalance,
-            hasSufficientBalance,
-            retryMode: true,
-            orderId: order._id
-        });
-
-    } catch (error) {
-        console.log("Retry Payment Checkout Error:", error.message);
-        res.status(500).send("Internal Server Error");
+const retryPayment = async (req, res) => {
+  try {
+    const user = req.session.userData;
+    if (!user || user.is_Blocked) {
+      req.session.destroy();
+      return res.redirect("/");
     }
+
+    const userId = user._id;
+    const orderId = req.params.orderId;
+
+    // Fetch the original order
+    const order = await orders
+      .findOne({ _id: orderId, userId })
+      .populate("items.productId");
+    console.log(" order ", order);
+
+    if (!order) {
+      return res.status(404).send("Order not found.");
+    }
+
+    const totalPrice = order.totalAmount;
+
+    const updatedUser = await users.findById(userId);
+    const addresses = updatedUser.address;
+    const userWallet = await wallets.findOne({ userId });
+    const userBalance = userWallet ? userWallet.balance : 0;
+    const hasSufficientBalance = userBalance >= totalPrice;
+
+    const mockCart = {
+      items: order.items,
+    };
+
+    res.render("checkOut", {
+      cart: mockCart,
+      count: order.items.length,
+      totalPrice,
+      addresses,
+      userBalance,
+      hasSufficientBalance,
+      retryMode: true,
+      orderId: order._id,
+    });
+  } catch (error) {
+    console.log("Retry Payment Checkout Error:", error.message);
+    res.status(500).send("Internal Server Error");
+  }
 };
 
 module.exports = {

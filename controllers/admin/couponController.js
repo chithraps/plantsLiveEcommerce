@@ -48,9 +48,21 @@ const createCoupon = async (req, res) => {
 }
 const loadViewCoupon = async (req, res) => {
     try {
-        console.log("in load view coupon");
-        const allCoupons = await coupons.find({});
-        res.render('viewCoupons', { coupons: allCoupons });
+        const perPage = 5; 
+        const page = parseInt(req.query.page) || 1;
+
+        const totalCoupons = await coupons.countDocuments({});
+        const allCoupons = await coupons
+            .find({})
+            .skip((page - 1) * perPage)
+            .limit(perPage)
+            .sort({ createdAt: -1 }); 
+
+        res.render('viewCoupons', { 
+            coupons: allCoupons,
+            currentPage: page,
+            totalPages: Math.ceil(totalCoupons / perPage)
+        });
 
     } catch (error) {
         console.log(error.message)

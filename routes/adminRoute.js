@@ -69,6 +69,8 @@ admin_rout.post('/editProduct',multer.upload.array('images', 5),productControlle
 
 admin_rout.get('/deleteProduct',auth.isLogin,productController.deleteProduct)
 
+admin_rout.get('/deleteProductImage',auth.isLogin,productController.deleteProductImage)
+
 //Offer management
 
 admin_rout.post('/addProductOffer',offerController.addOfferOnProduct)
