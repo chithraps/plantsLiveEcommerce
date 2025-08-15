@@ -34,6 +34,12 @@ user_rout.post('/register',usercontroller.registerUser)
 
 user_rout.get('/login',auth.isLogout,usercontroller.lodLogin)
 
+user_rout.get('/chooseLogin',auth.isLogout,usercontroller.chooseLogin)
+
+user_rout.get("/auth/google", usercontroller.googleAuth);
+
+user_rout.get("/auth/google/callback", usercontroller.googleCallback, usercontroller.googleSuccess);
+
 user_rout.post('/reset-password',usercontroller.sendPasswordLink)
 
 user_rout.get('/changePassword',usercontroller.changePassword)
@@ -89,11 +95,13 @@ user_rout.post('/verifyPayment',orderController.verifyPayment)
 
 user_rout.get('/viewOrders',auth.isLogin,orderController.viewOrders)
 
-user_rout.post('/cancelOrder',orderController.cancelOrder)
+user_rout.post('/cancelOrder',auth.isLogin,orderController.cancelOrder)
 
-user_rout.get('/orderDetails/:orderId', orderController.getOrderDetails);
+user_rout.get('/orderDetails/:orderId', auth.isLogin,orderController.getOrderDetails);
 
-user_rout.get('/retryPayment/:orderId',orderController.retryPayment)
+user_rout.get('/retryPayment/:orderId',auth.isLogin,orderController.retryPayment)
+
+user_rout.get('/paymentFailure',auth.isLogin,orderController.loadPaymentFalilure)
 
 //manage profile
 

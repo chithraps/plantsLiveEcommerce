@@ -23,6 +23,14 @@
     .nested-table {
       border-collapse: collapse;
     }
+    .nested-table td:first-child {
+  padding-right: 20px; 
+}
+
+.nested-table img {
+  display: block;
+  margin-right: 70px; 
+}
 
     .nested-table th,
     .nested-table td {
@@ -33,7 +41,7 @@
 
     .container {
       overflow: hidden;
-      /* Adjust the value to your desired minimum height */
+      
     }
 
     .card {
@@ -91,19 +99,20 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <th scope="col">Order ID</th>
+        
         <th scope="col">Order Date</th>
         <th scope="col">Order Status</th>
         <th scope="col">Shipping Address</th>
         <th>Product Image</th>
         <th>Product Name</th>
         <th>Price</th>
+        <th>Quantity</th>
       </tr>
     </thead>
     <tbody>
       <% userOrders.forEach((order)=> { %>
       <tr>
-        <td><%= order._id %></td>
+        
         <td><%= order.createdAt.toDateString() %></td>
         <td><%= order.status %></td>
         <td>
@@ -115,24 +124,50 @@
           <%= order.shippingAddress.postalCode %>
         </td>
 
-        <td colspan="5">
-          <table class="nested-table">
-            <% order.items.forEach((item)=> { %>
-            <tr>
-              <td>
-                <img
-                  src="<%= item.productId.images[0] %>"
-                  alt="<%= item.productId.name %>"
-                  class="img-thumbnail"
-                  width="100"
-                />
-              </td>
-              <td><%= item.productId.name %></td>
-              <td><%= item.price %></td>
-            </tr>
-            <% }); %>
-          </table>
+        <td>
+    <table class="nested-table">
+      <% order.items.forEach((item)=> { %>
+      <tr>
+        <td>
+          <img src="<%= item.productId.images[0] %>" 
+               alt="<%= item.productId.name %>" 
+               class="img-thumbnail" width="100" />
         </td>
+      </tr>
+      <% }); %>
+    </table>
+  </td>
+
+  <!-- Product Name -->
+  <td>
+    <table class="nested-table">
+      <% order.items.forEach((item)=> { %>
+      <tr>
+        <td><%= item.productId.name %></td>
+      </tr>
+      <% }); %>
+    </table>
+  </td>
+
+  <!-- Price -->
+  <td>
+    <table class="nested-table">
+      <% order.items.forEach((item)=> { %>
+      <tr>
+        <td><%= order.totalAmount %></td>
+      </tr>
+      <% }); %>
+    </table>
+  </td>
+  <td>
+    <table class="nested-table">
+      <% order.items.forEach((item)=> { %>
+      <tr>
+        <td><%= item.quantity %></td>
+      </tr>
+      <% }); %>
+    </table>
+  </td>
 
         <td>
             <% if (order.status === "Pending") { %>
@@ -266,10 +301,10 @@
               if (paymentMethod === "Razorpay" || paymentMethod === "Wallet") {
                 Swal.fire({
                   title: "Order Cancelled!",
-                  text: "Your order cancellation request has been processed successfully. We will initiate the refund once it has been approved.",
+                  text: "Your order cancellation request has been processed successfully.The refund amount has been credited successfully.",
                   icon: "success",
                 }).then(() => {
-                  window.location.href = "/viewOrders"; // Reload the page after the user acknowledges the alert
+                  window.location.href = "/viewOrders"; 
                 });
               } else if (paymentMethod === "Cash on Delivery") {
                 Swal.fire({
@@ -277,7 +312,7 @@
                   text: "Your order cancellation request has been processed successfully.",
                   icon: "success",
                 }).then(() => {
-                  window.location.href = "/viewOrders"; // Reload the page after the user acknowledges the alert
+                  window.location.href = "/viewOrders"; 
                 });
               } else {
                 Swal.fire({
@@ -285,7 +320,7 @@
                   text: "Your order cancellation request has been processed successfully.",
                   icon: "success",
                 }).then(() => {
-                  window.location.href = "/viewOrders"; // Reload the page after the user acknowledges the alert
+                  window.location.href = "/viewOrders"; 
                 });
               }
             } else {

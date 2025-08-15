@@ -338,54 +338,66 @@
             const placeOrderBtn = document.getElementById("placeOrderBtn");
 
 
-            placeOrderBtn.addEventListener("click", function () {
-                // Collect form data and send it to the server
-                const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
-                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
-                const totalPrice = document.querySelector('input[name="totalPrice"]').value;
+           placeOrderBtn.addEventListener("click", function () {
+    // Collect form data
+    const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+    const totalPrice = document.querySelector('input[name="totalPrice"]').value;
 
-                if (!selectedAddress || !paymentMethod) {
-                    alert("Please select a shipping address and payment method.");
-                    return;
-                }
-                
-                // Prepare the data to send to the server
-                const orderData = {
-                    selectedAddress: selectedAddress.value,
-                    paymentMethod: paymentMethod.value,
-                    totalPrice: totalPrice,
-                    newTotalAmount: newTotalAmount,
-                    orderId
-                };
+    if (!selectedAddress || !paymentMethod) {
+        Swal.fire('Error', 'Please select a shipping address and payment method.', 'error');
+        return;
+    }
 
-                // Send an AJAX request to place the order
-                // Replace '/placeOrder' with your actual server endpoint
-                fetch("/placeOrder", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(orderData),
-                })
-                    .then((response) => response.json())
-                    .then(async (data) => {
+    // Prepare order data
+    const orderData = {
+        selectedAddress: selectedAddress.value,
+        paymentMethod: paymentMethod.value,
+        totalPrice: totalPrice,
+        newTotalAmount: newTotalAmount,
+        orderId: orderId || null
+    };
 
-                        if (data.codStatus === true) {
+    // Place order request
+    fetch("/placeOrder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+    })
+    .then((response) => response.json())
+    .then(async (data) => {
+        if (data.codStatus === true || data.status === true) {
+            window.location.href = '/orderConfirmation';
+        } else if (data.status === false) {
+            await Swal.fire('Error', data.message, 'error');
+            window.location.href = '/viewCart';
+        } else {
+            
+            isPaymentInProgress = true;
 
-                            window.location.href = '/orderConfirmation'
-                        } else if (data.status === false) {
-                            await Swal.fire('Error', data.message, 'error').then(() => {
-                                window.location.href = '/viewCart'; // Reload the page after the user acknowledges the alert
-                            });;
+            
+            window.history.pushState(null, null, window.location.href);
 
-                        } else if (data.status === true) {
-                            window.location.href = '/orderConfirmation'
-                        } else {
-                            razorpayPayment(data)
-                        }
-                    })
+            
+           
 
-            });
+            
+            
+
+            razorpayPayment(data);
+        }
+    })
+    .catch((error) => {
+        console.error('Error placing order:', error);
+        Swal.fire({
+            title: 'Error',
+            text: 'An error occurred while placing your order. Please try again.',
+            icon: 'error',
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        });
+    });
+});
 
             showCouponsBtn.addEventListener("click", () => {
                 // Make an AJAX request to fetch available coupons
@@ -448,7 +460,17 @@
                 },
                 "theme": {
                     "color": "#3399cc"
+                },
+                
+                "modal": {
+                "ondismiss": function () {
+                    // Re-enable back button when Razorpay modal is closed
+                    window.onpopstate = null;
+                    Swal.fire('Payment Cancelled', 'The payment process was interrupted.', 'error').then(() => {
+                        window.location.href = "/paymentFailure";
+                    });
                 }
+            }
             };
             var rzp1 = new Razorpay(options);
             rzp1.open();

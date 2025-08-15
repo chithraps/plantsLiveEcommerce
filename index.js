@@ -7,6 +7,9 @@ const session = require("express-session")
 const userRoutes = require("./routes/userRoute")
 const adminRoutes = require("./routes/adminRoute")
 const path = require('path');
+const passport = require("passport");
+
+
 
 const app = express()
 connectToDatabase();
@@ -16,6 +19,8 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }))
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(express.json())
 

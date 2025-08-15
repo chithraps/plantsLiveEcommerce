@@ -7,9 +7,87 @@ const banner = require("../../models/bannerModel");
 const nodemailer = require("nodemailer");
 const otp_generator = require("otp-generator");
 const { isValidObjectId } = require("mongoose");
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 require("dotenv/config");
 // to store email and otp pair
 const otpMap = new Map();
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((obj, done) => {
+  done(null, obj);
+});
+
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "http://localhost:3000/auth/google/callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        
+        const email = profile.emails[0].value;
+        const name = profile.displayName;
+
+        
+        let user = await users.findOne({ email }).select('-password');
+        console.log("user ",user)
+        if (!user) {
+          
+          user = new users({
+            name,
+            email,
+            is_verified: true, 
+          });
+          await user.save();
+        } else if (!user.is_verified) {
+          
+          user.is_verified = true;
+          await user.save();
+        }
+
+        
+        return done(null, user);
+      } catch (error) {
+        return done(error, null);
+      }
+    }
+  )
+);
+
+
+const googleAuth = passport.authenticate("google", {
+  scope: ["profile", "email"],
+  prompt: "select_account"
+});
+
+const googleCallback = passport.authenticate("google", {
+  failureRedirect: "/",
+});
+
+
+const googleSuccess = (req, res) => {
+
+  console.log("req.user ",req.user)
+
+   req.session.userData =  req.user;
+   res.redirect("/home");
+};
+
+
+const chooseLogin = async (req, res) => {
+  try {
+    console.log("in choose login page!!");
+    res.render("userLoginOptions");
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const securePassword = async (password) => {
   try {
@@ -742,4 +820,9 @@ module.exports = {
   loadViewProduct,
   validateCoupon,
   getAvailableCoupons,
+  chooseLogin,
+  googleAuth,
+  googleCallback,
+  googleSuccess,
+  
 };

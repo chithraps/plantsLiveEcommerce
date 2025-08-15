@@ -37,7 +37,7 @@ const couponSchema = new mongoose.Schema({
   },
   maxUses: {
     type: Number,
-    default: null, // Unlimited uses if null
+    default: null,
   },
   currentUses: {
     type: Number,
@@ -52,7 +52,7 @@ const couponSchema = new mongoose.Schema({
   ],
   maximumDiscount: {
     type: Number,
-    default: 1000, // Set the default maximum discount to 1000
+    default: 1000, 
   },
 
 });

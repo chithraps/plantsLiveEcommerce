@@ -67,7 +67,7 @@
                                 <tbody>
                                     <% transactions.forEach(tx => { %>
                                         <tr>
-                                            <td><%= new Date(tx.date).toLocaleString() %></td>
+                                            <td><%= new Date(tx.date).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) %></td>
                                             <td class="<%= tx.type %>"><%= tx.type.charAt(0).toUpperCase() + tx.type.slice(1) %></td>
                                             <td>
                                                 <% if (tx.type === 'credit') { %>

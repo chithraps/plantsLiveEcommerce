@@ -176,10 +176,12 @@
 
   // Handle image selection
   imageInput.addEventListener("change", function () {
-    imageQueue = Array.from(this.files);
-    croppedImages = [];
-    imagePreview.innerHTML = "";
-    handleNextImage();
+    // imageQueue = Array.from(this.files);
+    // croppedImages = [];
+    // imagePreview.innerHTML = "";
+    // handleNextImage();
+    imageQueue = imageQueue.concat(Array.from(this.files)); 
+handleNextImage();
   });
 
   function handleNextImage() {
@@ -281,25 +283,6 @@
     e.preventDefault();
     clearErrors();
 
-    if (croppedImages.length === 0) {
-      document.getElementById("imageError").innerText =
-        "Please upload and crop at least one image.";
-      return;
-    }
-
-    // Attach cropped images to form
-    const dataTransfer = new DataTransfer();
-    croppedImages.forEach((file) => dataTransfer.items.add(file));
-    imageInput.files = dataTransfer.files;
-
-    form.submit(); // Now safely submit
-  });
-
-  // Validation logic
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    clearErrors();
-
     const name = document.getElementById("name").value.trim();
     const description = document.getElementById("description").value.trim();
     const price = parseFloat(document.getElementById("price").value);
@@ -307,22 +290,22 @@
     const category = document.getElementById("category").value;
 
     if (!name) return displayError("nameError", "Name is required.");
-    if (!description)
-      return displayError("descriptionError", "Description is required.");
-    if (!price || price <= 0)
-      return displayError("priceError", "Enter a valid price.");
-    if (!stock || stock <= 0)
-      return displayError("stockError", "Enter a valid stock quantity.");
-    if (!category)
-      return displayError("dropdownError", "Please select a category.");
-
+    if (!description) return displayError("descriptionError", "Description is required.");
+    if (!price || price <= 0) return displayError("priceError", "Enter a valid price.");
+    if (!stock || stock <= 0) return displayError("stockError", "Enter a valid stock quantity.");
+    if (!category) return displayError("dropdownError", "Please select a category.");
     if (croppedImages.length === 0) {
-      displayError("imageError", "Please crop and add at least one image.");
-      return;
+        displayError("imageError", "Please upload and crop at least one image.");
+        return;
     }
 
+    // Attach cropped images to form
+    const dataTransfer = new DataTransfer();
+    croppedImages.forEach((file) => dataTransfer.items.add(file));
+    imageInput.files = dataTransfer.files;
+
     form.submit();
-  });
+});
 
   function displayError(fieldId, message) {
     document.getElementById(fieldId).textContent = message;

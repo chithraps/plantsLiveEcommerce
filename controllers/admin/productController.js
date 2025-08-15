@@ -58,7 +58,7 @@ const viewProducts = async (req, res) => {
         },
       },
       {
-        $sort: { createdAt: -1 }, 
+        $sort: { createdAt: -1 },
       },
 
       {
@@ -139,35 +139,48 @@ const loadEditProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
   try {
-    const { id, name, description, price, productCategory, stock } = req.body;
+    const {
+      id,
+      name,
+      description,
+      price,
+      productCategory,
+      stock,
+      deletedImages,
+    } = req.body;
     const stockCount = parseInt(stock);
+    const deletedList = deletedImages ? JSON.parse(deletedImages) : [];
 
     const images = req.files.map((file) => `/productImages/${file.filename}`);
-
     const currentProductData = await product.findById(id);
 
-    //const newStockCount = currentProductData.stock_count + stockCount;
-    const oldImages = currentProductData.images;
-    oldImages.forEach((oldImagePath) => {
-      const filePath = path.join(__dirname, "../..", "public", oldImagePath);
-      fs.unlinkSync(filePath);
-    });
-
-    const productData = await product.findByIdAndUpdate(
-      { _id: id },
-      {
-        $set: {
-          name,
-          description,
-          price,
-          images,
-          category: productCategory,
-          stock_count: stockCount,
-        },
-      }
+    // Filter out deleted images
+    const remainingOldImages = currentProductData.images.filter(
+      (img) => !deletedList.includes(img)
     );
 
-    console.log(productData);
+    // Delete only the removed images from disk
+    deletedList.forEach((oldImagePath) => {
+      const filePath = path.join(__dirname, "../..", "public", oldImagePath);
+      if (fs.existsSync(filePath)) {
+        console.log("image is deleted *** ")
+        fs.unlinkSync(filePath);
+      }
+    });
+
+    // New images + old remaining images
+    const updatedImages = [...remainingOldImages, ...images];
+
+    const productData = await product.findByIdAndUpdate(id, {
+      $set: {
+        name,
+        description,
+        price,
+        images: updatedImages,
+        category: productCategory,
+        stock_count: stockCount,
+      },
+    });
 
     if (productData) {
       res.redirect("/admin/viewProducts");
@@ -178,9 +191,7 @@ const editProduct = async (req, res) => {
     console.log(error.message);
   }
 };
-const deleteProductImage = async (req,res)=>{
-
-}
+const deleteProductImage = async (req, res) => {};
 
 const deleteProduct = async (req, res) => {
   try {
